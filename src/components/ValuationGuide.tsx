@@ -88,6 +88,9 @@ const ValuationGuide = () => {
         isB2B
       );
 
+      // Get UTM parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      
       const webhookData = {
         firstName: data.firstName,
         email: data.email,
@@ -102,7 +105,13 @@ const ValuationGuide = () => {
         businessModel: data.businessModel,
         calculatedValuation: valuation,
         timestamp: new Date().toISOString(),
-        source: 'valuation_guide'
+        source: 'valuation_guide',
+        // Include UTM parameters
+        utm_source: urlParams.get('utm_source') || '',
+        utm_medium: urlParams.get('utm_medium') || '',
+        utm_campaign: urlParams.get('utm_campaign') || '',
+        utm_term: urlParams.get('utm_term') || '',
+        utm_content: urlParams.get('utm_content') || ''
       };
 
       console.log('Sending webhook data:', webhookData);
@@ -112,10 +121,10 @@ const ValuationGuide = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors',
         body: JSON.stringify(webhookData),
       });
 
+      console.log('Webhook response status:', response.status);
       console.log('Webhook sent successfully');
       return true;
     } catch (error) {
@@ -138,16 +147,18 @@ const ValuationGuide = () => {
   const nextStep = async () => {
     if (currentStep === 6) { // Contact step
       // Send webhook and show results waiting
+      console.log('Attempting to send webhook...');
       const success = await sendWebhook(valuationData);
-      if (success) {
-        setShowResultsWaiting(true);
-        
-        // Set a minimum 10-minute timer before any results could potentially be shown
-        setTimeout(() => {
-          console.log('Minimum 10 minutes elapsed');
-          // In a real implementation, you might check for results here
-        }, 10 * 60 * 1000); // 10 minutes
-      }
+      console.log('Webhook success:', success);
+      
+      // Always show results waiting regardless of webhook success
+      setShowResultsWaiting(true);
+      
+      // Set a minimum 10-minute timer before any results could potentially be shown
+      setTimeout(() => {
+        console.log('Minimum 10 minutes elapsed');
+        // In a real implementation, you might check for results here
+      }, 10 * 60 * 1000); // 10 minutes
     } else if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }
