@@ -11,7 +11,9 @@ import GrowthRateStep from './steps/GrowthRateStep';
 import BusinessModelStep from './steps/BusinessModelStep';
 import ContactStep from './steps/ContactStep';
 import LoadingScreen from './steps/LoadingScreen';
+import ResultsWaiting from './steps/ResultsWaiting';
 import ExitPopup from './ExitPopup';
+import { calculateValuation } from '../utils/valuationCalculator';
 
 export interface ValuationData {
   revenue: number;
@@ -20,6 +22,9 @@ export interface ValuationData {
   networkEffects: string;
   growthRate: number;
   businessModel: string;
+  firstName: string;
+  email: string;
+  phone: string;
   companyName: string;
   website: string;
 }
@@ -27,6 +32,7 @@ export interface ValuationData {
 const ValuationGuide = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showExitPopup, setShowExitPopup] = useState(false);
+  const [showResultsWaiting, setShowResultsWaiting] = useState(false);
   const [valuationData, setValuationData] = useState<ValuationData>({
     revenue: 0,
     cac: 0,
@@ -34,6 +40,9 @@ const ValuationGuide = () => {
     networkEffects: '',
     growthRate: 0,
     businessModel: '',
+    firstName: '',
+    email: '',
+    phone: '',
     companyName: '',
     website: ''
   });
@@ -45,14 +54,14 @@ const ValuationGuide = () => {
     let timer: NodeJS.Timeout;
     
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (currentStep > 0 && currentStep < totalSteps - 1) {
+      if (currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting) {
         setShowExitPopup(true);
         e.preventDefault();
         e.returnValue = '';
       }
     };
 
-    if (currentStep > 0 && currentStep < totalSteps - 1) {
+    if (currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting) {
       timer = setTimeout(() => {
         setShowExitPopup(true);
       }, 30000); // Show popup after 30 seconds of inactivity
@@ -64,10 +73,82 @@ const ValuationGuide = () => {
       if (timer) clearTimeout(timer);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentStep]);
+  }, [currentStep, showResultsWaiting]);
 
-  const nextStep = () => {
-    if (currentStep < totalSteps - 1) {
+  const sendWebhook = async (data: ValuationData) => {
+    try {
+      // Calculate valuation using your formula
+      const brandScore = getBrandScore(data.networkEffects);
+      const isB2B = data.businessModel === 'b2b';
+      const valuation = calculateValuation(
+        data.revenue,
+        data.cac,
+        brandScore,
+        data.growthRate,
+        isB2B
+      );
+
+      const webhookData = {
+        firstName: data.firstName,
+        email: data.email,
+        phone: data.phone,
+        companyName: data.companyName,
+        website: data.website,
+        revenue: data.revenue,
+        cac: data.cac,
+        cacContext: data.cacContext,
+        networkEffects: data.networkEffects,
+        growthRate: data.growthRate,
+        businessModel: data.businessModel,
+        calculatedValuation: valuation,
+        timestamp: new Date().toISOString(),
+        source: 'valuation_guide'
+      };
+
+      console.log('Sending webhook data:', webhookData);
+
+      const response = await fetch('https://hook.us1.make.com/ibj7l0wt2kmub6olt7qu4qeluyi4q8mz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors',
+        body: JSON.stringify(webhookData),
+      });
+
+      console.log('Webhook sent successfully');
+      return true;
+    } catch (error) {
+      console.error('Error sending webhook:', error);
+      return false;
+    }
+  };
+
+  const getBrandScore = (networkEffects: string): number => {
+    // Convert network effects to a score between 0-4
+    const scoreMap: { [key: string]: number } = {
+      'minimal': 1,
+      'moderate': 2,
+      'strong': 3,
+      'dominant': 4
+    };
+    return scoreMap[networkEffects] || 0;
+  };
+
+  const nextStep = async () => {
+    if (currentStep === 6) { // Contact step
+      // Send webhook and show results waiting
+      const success = await sendWebhook(valuationData);
+      if (success) {
+        setShowResultsWaiting(true);
+        
+        // Set a minimum 10-minute timer before any results could potentially be shown
+        setTimeout(() => {
+          console.log('Minimum 10 minutes elapsed');
+          // In a real implementation, you might check for results here
+        }, 10 * 60 * 1000); // 10 minutes
+      }
+    } else if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -80,6 +161,10 @@ const ValuationGuide = () => {
   };
 
   const renderStep = () => {
+    if (showResultsWaiting) {
+      return <ResultsWaiting />;
+    }
+
     switch (currentStep) {
       case 0:
         return <IntroStep onNext={nextStep} />;
@@ -128,8 +213,14 @@ const ValuationGuide = () => {
       case 6:
         return (
           <ContactStep
+            firstName={valuationData.firstName}
+            email={valuationData.email}
+            phone={valuationData.phone}
             companyName={valuationData.companyName}
             website={valuationData.website}
+            onFirstNameChange={(value) => updateValuationData('firstName', value)}
+            onEmailChange={(value) => updateValuationData('email', value)}
+            onPhoneChange={(value) => updateValuationData('phone', value)}
             onCompanyNameChange={(value) => updateValuationData('companyName', value)}
             onWebsiteChange={(value) => updateValuationData('website', value)}
             onNext={nextStep}
@@ -146,7 +237,7 @@ const ValuationGuide = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl mx-auto shadow-2xl border-0 bg-card/95 backdrop-blur-sm">
         <CardContent className="p-8">
-          {currentStep > 0 && currentStep < totalSteps - 1 && (
+          {currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting && (
             <div className="mb-8">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-muted-foreground">
@@ -166,7 +257,7 @@ const ValuationGuide = () => {
         </CardContent>
       </Card>
 
-      {showExitPopup && (
+      {showExitPopup && !showResultsWaiting && (
         <ExitPopup
           onClose={() => setShowExitPopup(false)}
           onContinue={() => setShowExitPopup(false)}

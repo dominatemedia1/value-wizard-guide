@@ -5,15 +5,37 @@ import { Input } from '@/components/ui/input';
 import { Shield, Mail } from 'lucide-react';
 
 interface ContactStepProps {
+  firstName: string;
+  email: string;
+  phone: string;
   companyName: string;
   website: string;
+  onFirstNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
   onCompanyNameChange: (value: string) => void;
   onWebsiteChange: (value: string) => void;
   onNext: () => void;
 }
 
-const ContactStep = ({ companyName, website, onCompanyNameChange, onWebsiteChange, onNext }: ContactStepProps) => {
-  const isValid = companyName.trim().length > 0 && website.trim().length > 0;
+const ContactStep = ({ 
+  firstName, 
+  email, 
+  phone, 
+  companyName, 
+  website, 
+  onFirstNameChange, 
+  onEmailChange, 
+  onPhoneChange, 
+  onCompanyNameChange, 
+  onWebsiteChange, 
+  onNext 
+}: ContactStepProps) => {
+  const isValid = firstName.trim().length > 0 && 
+                  email.trim().length > 0 && 
+                  phone.trim().length > 0 && 
+                  companyName.trim().length > 0 && 
+                  website.trim().length > 0;
 
   return (
     <div className="space-y-8">
@@ -27,6 +49,45 @@ const ContactStep = ({ companyName, website, onCompanyNameChange, onWebsiteChang
       </div>
 
       <div className="space-y-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            First Name *
+          </label>
+          <Input
+            type="text"
+            placeholder="Enter your first name"
+            value={firstName}
+            onChange={(e) => onFirstNameChange(e.target.value)}
+            className="text-lg py-3"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            Email *
+          </label>
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            className="text-lg py-3"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            Phone *
+          </label>
+          <Input
+            type="tel"
+            placeholder="Enter your phone number"
+            value={phone}
+            onChange={(e) => onPhoneChange(e.target.value)}
+            className="text-lg py-3"
+          />
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
             Company Name *
