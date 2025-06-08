@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +13,7 @@ import LoadingScreen from './steps/LoadingScreen';
 import ResultsWaiting from './steps/ResultsWaiting';
 import ExitPopup from './ExitPopup';
 import { calculateValuation } from '../utils/valuationCalculator';
+import { webflowControl, initWebflowListener } from '../utils/webflowIntegration';
 
 export interface ValuationData {
   revenue: number;
@@ -51,6 +51,9 @@ const ValuationGuide = () => {
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   useEffect(() => {
+    // Initialize Webflow listener
+    initWebflowListener();
+    
     let timer: NodeJS.Timeout;
     
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -126,6 +129,14 @@ const ValuationGuide = () => {
 
       console.log('Webhook response status:', response.status);
       console.log('Webhook sent successfully');
+
+      // Notify Webflow of form submission
+      webflowControl.formSubmitted(webhookData);
+      
+      // Hide Webflow elements after submission
+      webflowControl.hideFields(['navigation-div', 'header-section']);
+      webflowControl.hideElement('background-div');
+
       return true;
     } catch (error) {
       console.error('Error sending webhook:', error);
