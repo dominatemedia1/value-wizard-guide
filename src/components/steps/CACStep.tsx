@@ -13,6 +13,17 @@ interface CACStepProps {
 }
 
 const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStepProps) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && cac > 0) {
+      onNext();
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^0-9]/g, '');
+    onCACChange(Number(inputValue));
+  };
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
@@ -20,7 +31,7 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
           What's your current Customer Acquisition Cost?
         </h2>
         <p className="text-muted-foreground">
-          Understanding your CAC helps us evaluate the efficiency of your growth engine.
+          Our AI uses CAC data to evaluate the efficiency of your growth engine and market positioning.
         </p>
       </div>
 
@@ -30,10 +41,11 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
             Customer Acquisition Cost ($)
           </label>
           <Input
-            type="number"
+            type="text"
             placeholder="Enter your CAC"
             value={cac || ''}
-            onChange={(e) => onCACChange(Number(e.target.value))}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
             className="text-lg py-3"
           />
         </div>
@@ -58,7 +70,7 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
         {cac > 0 && (
           <div className="bg-muted/50 rounded-lg p-4">
             <p className="text-sm text-muted-foreground">
-              💡 <strong>Industry Benchmark:</strong> A healthy CAC should be 1/3 or less of your customer lifetime value (LTV).
+              💡 <strong>AI Benchmark:</strong> Our AI compares your CAC against industry standards where healthy CAC should be 1/3 or less of customer lifetime value.
             </p>
           </div>
         )}

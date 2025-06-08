@@ -55,11 +55,29 @@ const ContactStep = ({
     }
   }, [onFirstNameChange, onEmailChange, onPhoneChange]);
 
+  const isValidWebsite = (url: string): boolean => {
+    const pattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    return pattern.test(url) && url.includes('.');
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^0-9\-\+\(\)\s]/g, '');
+    onPhoneChange(inputValue);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && isValid) {
+      onNext();
+    }
+  };
+
   const isValid = firstName.trim().length > 0 && 
                   email.trim().length > 0 && 
+                  email.includes('@') &&
                   phone.trim().length > 0 && 
                   companyName.trim().length > 0 && 
-                  website.trim().length > 0;
+                  website.trim().length > 0 &&
+                  isValidWebsite(website);
 
   return (
     <div className="space-y-8">
@@ -68,7 +86,7 @@ const ContactStep = ({
           Almost there! Get your personalized AI valuation report
         </h2>
         <p className="text-muted-foreground">
-          We'll send your comprehensive AI-powered valuation analysis to help you understand your company's worth.
+          Our AI will analyze your data and generate a comprehensive valuation report with actionable insights.
         </p>
       </div>
 
@@ -84,6 +102,7 @@ const ContactStep = ({
                 placeholder="Enter your first name"
                 value={firstName}
                 onChange={(e) => onFirstNameChange(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="text-lg py-3"
               />
             </div>
@@ -97,6 +116,7 @@ const ContactStep = ({
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="text-lg py-3"
               />
             </div>
@@ -109,7 +129,8 @@ const ContactStep = ({
                 type="tel"
                 placeholder="Enter your phone number"
                 value={phone}
-                onChange={(e) => onPhoneChange(e.target.value)}
+                onChange={handlePhoneChange}
+                onKeyPress={handleKeyPress}
                 className="text-lg py-3"
               />
             </div>
@@ -125,6 +146,7 @@ const ContactStep = ({
             placeholder="Enter your company name"
             value={companyName}
             onChange={(e) => onCompanyNameChange(e.target.value)}
+            onKeyPress={handleKeyPress}
             className="text-lg py-3"
           />
         </div>
@@ -138,8 +160,12 @@ const ContactStep = ({
             placeholder="https://yourcompany.com"
             value={website}
             onChange={(e) => onWebsiteChange(e.target.value)}
+            onKeyPress={handleKeyPress}
             className="text-lg py-3"
           />
+          {website && !isValidWebsite(website) && (
+            <p className="text-sm text-destructive">Please enter a valid website URL (e.g., company.com)</p>
+          )}
         </div>
 
         <div className="bg-muted/50 rounded-lg p-4 space-y-3">
@@ -158,12 +184,12 @@ const ContactStep = ({
           <div className="flex items-start space-x-3">
             <Mail className="w-5 h-5 text-primary mt-0.5" />
             <div>
-              <p className="font-medium text-foreground">What you'll receive:</p>
+              <p className="font-medium text-foreground">What your AI report includes:</p>
               <ul className="text-sm text-muted-foreground mt-1 space-y-1">
                 <li>• AI-powered detailed valuation breakdown with methodology</li>
-                <li>• Benchmarking against industry standards</li>
-                <li>• Actionable insights to increase your valuation</li>
-                <li>• Market comparables and trending data</li>
+                <li>• Benchmarking against industry standards using AI analysis</li>
+                <li>• AI-generated actionable insights to increase your valuation</li>
+                <li>• Market comparables and trending data from our AI database</li>
               </ul>
             </div>
           </div>

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle } from 'lucide-react';
+import { Clock, CheckCircle, Brain } from 'lucide-react';
 
 const ResultsWaiting = () => {
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -23,16 +23,16 @@ const ResultsWaiting = () => {
     <div className="space-y-8 text-center">
       <div className="space-y-4">
         <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-light/20 rounded-full mb-4">
-          <Clock className="w-10 h-10 text-primary" />
+          <Brain className="w-10 h-10 text-primary animate-pulse" />
         </div>
         
         <h2 className="text-3xl font-bold text-foreground">
-          Your Valuation Report is Being Prepared
+          AI is Analyzing Your Company Data
         </h2>
         
         <p className="text-muted-foreground max-w-md mx-auto">
-          Our team of experts is analyzing your data and preparing a comprehensive valuation report. 
-          This process typically takes 10-15 minutes to ensure accuracy.
+          Our advanced AI is processing your metrics against our database of 10,000+ company valuations 
+          to generate your personalized report. This typically takes 10-15 minutes for maximum accuracy.
         </p>
       </div>
 
@@ -40,36 +40,36 @@ const ResultsWaiting = () => {
         <div className="flex items-center justify-center space-x-2 mb-4">
           <Clock className="w-5 h-5 text-primary" />
           <span className="text-lg font-medium text-foreground">
-            Time Elapsed: {formatTime(timeElapsed)}
+            AI Processing Time: {formatTime(timeElapsed)}
           </span>
         </div>
         
         <div className="space-y-3 text-sm text-muted-foreground">
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-4 h-4 text-green-600" />
-            <span>Data submitted successfully</span>
+            <span>Data submitted to AI successfully</span>
           </div>
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-4 h-4 text-green-600" />
-            <span>Webhook notification sent</span>
+            <span>AI model initialized</span>
           </div>
           <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-primary" />
-            <span>Expert analysis in progress...</span>
+            <Brain className="w-4 h-4 text-primary animate-pulse" />
+            <span>AI analyzing your valuation metrics...</span>
           </div>
         </div>
       </div>
 
       <div className="bg-muted/50 rounded-lg p-4 max-w-md mx-auto">
         <p className="text-sm text-muted-foreground">
-          💡 <strong>What's happening:</strong> Our valuation experts are reviewing your metrics 
-          against our database of 10,000+ company valuations to provide you with the most 
-          accurate assessment possible.
+          🤖 <strong>AI Process:</strong> Our valuation AI is comparing your metrics against 
+          industry benchmarks, calculating multiple scenarios, and generating personalized 
+          insights to maximize your company's value.
         </p>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        You'll receive your detailed report via email once the analysis is complete.
+        You'll receive your AI-generated detailed report via email once the analysis is complete.
       </p>
     </div>
   );

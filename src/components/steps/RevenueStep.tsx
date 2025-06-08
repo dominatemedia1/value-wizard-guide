@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 
 interface RevenueStepProps {
   value: number;
@@ -10,71 +10,50 @@ interface RevenueStepProps {
 }
 
 const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
-  const formatRevenue = (amount: number) => {
-    if (amount >= 25000000) return '$25M+';
-    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
-    if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
-    return `$${amount.toLocaleString()}`;
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && value > 0) {
+      onNext();
+    }
   };
 
-  const handleSliderChange = (values: number[]) => {
-    onChange(values[0]);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^0-9]/g, '');
+    onChange(Number(inputValue));
   };
 
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
-          What is your current annual recurring revenue (ARR)?
+          What's your current Annual Recurring Revenue?
         </h2>
         <p className="text-muted-foreground">
-          This helps us understand the scale of your business and apply the right valuation multiple.
+          This helps our AI analyze your company's revenue scale and market position.
         </p>
       </div>
 
-      <div className="space-y-8">
-        <div className="text-center">
-          <div className="inline-block bg-primary-light/20 rounded-lg px-6 py-4 mb-4">
-            <span className="text-4xl font-bold text-primary">
-              {formatRevenue(value)}
-            </span>
-          </div>
-          <p className="text-sm text-muted-foreground">Annual Recurring Revenue</p>
-        </div>
-
-        <div className="space-y-4">
-          <Slider
-            value={[value]}
-            onValueChange={handleSliderChange}
-            max={25000000}
-            min={0}
-            step={50000}
-            className="w-full"
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            Annual Recurring Revenue ($)
+          </label>
+          <Input
+            type="text"
+            placeholder="Enter your ARR"
+            value={value || ''}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            className="text-lg py-3"
           />
-          
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>$0</span>
-            <span>$5M</span>
-            <span>$10M</span>
-            <span>$15M</span>
-            <span>$20M</span>
-            <span>$25M+</span>
-          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {[100000, 500000, 1000000, 5000000].map((amount) => (
-            <Button
-              key={amount}
-              variant="outline"
-              size="sm"
-              onClick={() => onChange(amount)}
-              className={value === amount ? 'bg-primary text-white' : ''}
-            >
-              {formatRevenue(amount)}
-            </Button>
-          ))}
-        </div>
+        {value > 0 && (
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-sm text-muted-foreground">
+              💡 <strong>AI Insight:</strong> Your revenue scale helps our AI determine appropriate valuation multiples and growth benchmarks.
+            </p>
+          </div>
+        )}
       </div>
 
       <Button 
