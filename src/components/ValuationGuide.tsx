@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft } from 'lucide-react';
-import IntroStep from './steps/IntroStep';
 import RevenueStep from './steps/RevenueStep';
 import CACStep from './steps/CACStep';
 import NetworkEffectsStep from './steps/NetworkEffectsStep';
@@ -50,7 +49,7 @@ const ValuationGuide = () => {
     website: ''
   });
 
-  const totalSteps = 8;
+  const totalSteps = 7; // Reduced by 1 since we removed intro step
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   // Load data from cookies on component mount
@@ -68,7 +67,7 @@ const ValuationGuide = () => {
 
   // Save data to cookies whenever valuationData or currentStep changes
   useEffect(() => {
-    if (currentStep > 0 && !isSubmitted) {
+    if (currentStep >= 0 && !isSubmitted) {
       saveValuationData({
         valuationData,
         currentStep,
@@ -84,14 +83,14 @@ const ValuationGuide = () => {
     let timer: NodeJS.Timeout;
     
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting) {
+      if (currentStep >= 0 && currentStep < totalSteps - 1 && !showResultsWaiting) {
         setShowExitPopup(true);
         e.preventDefault();
         e.returnValue = '';
       }
     };
 
-    if (currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting) {
+    if (currentStep >= 0 && currentStep < totalSteps - 1 && !showResultsWaiting) {
       timer = setTimeout(() => {
         setShowExitPopup(true);
       }, 30000); // Show popup after 30 seconds of inactivity
@@ -195,7 +194,7 @@ const ValuationGuide = () => {
   };
 
   const nextStep = async () => {
-    if (currentStep === 6) { // Contact step
+    if (currentStep === 5) { // Contact step (now step 5 instead of 6)
       // Mark as submitted and clear cookies for form data (but keep submitted state)
       setIsSubmitted(true);
       saveValuationData({
@@ -245,8 +244,6 @@ const ValuationGuide = () => {
 
     switch (currentStep) {
       case 0:
-        return <IntroStep onNext={nextStep} />;
-      case 1:
         return (
           <RevenueStep
             value={valuationData.revenue}
@@ -254,7 +251,7 @@ const ValuationGuide = () => {
             onNext={nextStep}
           />
         );
-      case 2:
+      case 1:
         return (
           <CACStep
             cac={valuationData.cac}
@@ -264,7 +261,7 @@ const ValuationGuide = () => {
             onNext={nextStep}
           />
         );
-      case 3:
+      case 2:
         return (
           <NetworkEffectsStep
             value={valuationData.networkEffects}
@@ -272,7 +269,7 @@ const ValuationGuide = () => {
             onNext={nextStep}
           />
         );
-      case 4:
+      case 3:
         return (
           <GrowthRateStep
             value={valuationData.growthRate}
@@ -280,7 +277,7 @@ const ValuationGuide = () => {
             onNext={nextStep}
           />
         );
-      case 5:
+      case 4:
         return (
           <BusinessModelStep
             value={valuationData.businessModel}
@@ -288,7 +285,7 @@ const ValuationGuide = () => {
             onNext={nextStep}
           />
         );
-      case 6:
+      case 5:
         return (
           <ContactStep
             firstName={valuationData.firstName}
@@ -304,7 +301,7 @@ const ValuationGuide = () => {
             onNext={nextStep}
           />
         );
-      case 7:
+      case 6:
         return <LoadingScreen valuationData={valuationData} />;
       default:
         return null;
@@ -315,11 +312,11 @@ const ValuationGuide = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl mx-auto border-2 border-border bg-card/95 backdrop-blur-sm">
         <CardContent className="p-8">
-          {currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting && (
+          {currentStep >= 0 && currentStep < totalSteps - 1 && !showResultsWaiting && (
             <div className="mb-8">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-muted-foreground">
-                  Step {currentStep} of {totalSteps - 2}
+                  Step {currentStep + 1} of {totalSteps - 1}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   {Math.round(progress)}% Complete
@@ -327,7 +324,7 @@ const ValuationGuide = () => {
               </div>
               <Progress value={progress} className="h-2" />
               
-              {currentStep > 1 && !isSubmitted && (
+              {currentStep > 0 && !isSubmitted && (
                 <Button
                   variant="ghost"
                   size="sm"
