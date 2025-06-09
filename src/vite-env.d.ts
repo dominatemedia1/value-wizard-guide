@@ -6,3 +6,5 @@ declare global {
     webhookSuccessFlag?: boolean;
   }
 }
+
+export {};
