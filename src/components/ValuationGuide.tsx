@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -166,7 +164,6 @@ const ValuationGuide = () => {
         document.body.setAttribute("data-webhook-success", "true");
         
         // After webhook success
-        console.log("Webhook success: true");
         window.parent.postMessage({ action: "webhookSuccess" }, "*");
         
         // Check if revenue is $250K or above to set the flag
