@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -162,6 +163,7 @@ const ValuationGuide = () => {
         } else {
           console.log('✅ Webhook sent successfully to the system!');
           console.log('Webhook success: true');
+          window.webhookSuccessFlag = true;
         }
       } else {
         console.log('❌ Webhook failed to send');
