@@ -48,9 +48,6 @@ const NetworkEffectsStep = ({ value, onChange, onNext }: NetworkEffectsStepProps
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold text-foreground">
-          NETWORK EFFECTS (BRAND PRESENCE)
-        </h2>
         <h3 className="text-xl text-foreground">
           {firstName ? `${firstName}, be honest...` : 'Be honest...'} How would you rate your brand's online presence and authority?
         </h3>

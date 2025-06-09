@@ -85,9 +85,6 @@ const ContactStep = ({
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold text-foreground">
-          FULL OPT-IN
-        </h2>
         <h3 className="text-xl text-foreground">
           Last step, {displayFirstName || firstName || 'friend'} (pinky promise). Simply enter your details below!
         </h3>
@@ -101,7 +98,7 @@ const ContactStep = ({
           <>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                First Name (Hidden)**
+                First Name**
               </label>
               <Input
                 type="text"
@@ -115,7 +112,7 @@ const ContactStep = ({
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Email (Hidden)
+                Email
               </label>
               <Input
                 type="email"
@@ -129,7 +126,7 @@ const ContactStep = ({
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Mobile (Hidden)*
+                Mobile*
               </label>
               <Input
                 type="tel"

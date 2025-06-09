@@ -23,22 +23,25 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
   };
 
   const quickSelectOptions = [
-    { value: -250, label: '-250%' },
-    { value: -50, label: '-50%' },
+    { value: -10, label: '-10%' },
+    { value: -5, label: '-5%' },
     { value: 0, label: '0%' },
-    { value: 25, label: '25%' },
+    { value: 5, label: '5%' },
+    { value: 10, label: '10%' },
+    { value: 20, label: '20%' },
     { value: 50, label: '50%' },
-    { value: 100, label: '100%' },
-    { value: 150, label: '150%' },
     { value: 250, label: '250%+' }
   ];
+
+  const formatPercentage = (num: number): string => {
+    if (num > 0) return `+${num}%`;
+    if (num < 0) return `${num}%`;
+    return `${num}%`;
+  };
 
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold text-foreground">
-          GROWTH RATE
-        </h2>
         <h3 className="text-xl text-foreground">
           What's your quarter-over-quarter growth rate?
         </h3>
@@ -50,7 +53,7 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
       <div className="space-y-6">
         <div className="space-y-4">
           <div className="text-center">
-            <span className="text-2xl font-bold text-foreground">+/- {value}%</span>
+            <span className="text-2xl font-bold text-foreground">{formatPercentage(value)}</span>
           </div>
           
           <div className="px-4">

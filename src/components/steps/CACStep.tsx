@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface CACStepProps {
@@ -20,10 +19,6 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
     }
   };
 
-  const handleSliderChange = (values: number[]) => {
-    onCACChange(values[0]);
-  };
-
   const formatNumber = (num: number): string => {
     if (num === 0) return '$0';
     return new Intl.NumberFormat('en-US', {
@@ -39,23 +34,9 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
     onCACChange(Number(inputValue));
   };
 
-  const quickSelectOptions = [
-    { value: 0, label: '$0' },
-    { value: 50, label: '$50' },
-    { value: 100, label: '$100' },
-    { value: 250, label: '$250' },
-    { value: 500, label: '$500' },
-    { value: 1000, label: '$1K' },
-    { value: 2500, label: '$2.5K' },
-    { value: 5000, label: '$5K+' }
-  ];
-
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold text-foreground">
-          CUSTOMER ACQUISITION COST
-        </h2>
         <h3 className="text-xl text-foreground">
           What's your current Customer Acquisition Cost (CAC)?
         </h3>

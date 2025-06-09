@@ -15,17 +15,17 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
   const steps = [
     {
       icon: Calculator,
-      title: 'Analyzing your financial metrics',
+      title: '🧮 Calculating your enterprise valuation...',
       description: 'Processing your ARR, CAC, and growth data...'
     },
     {
       icon: BarChart3,
-      title: 'Benchmarking against industry standards',
+      title: 'Analyzing against 2,847 similar SaaS exits...',
       description: 'Comparing with 1,000+ similar companies...'
     },
     {
       icon: TrendingUp,
-      title: 'Calculating valuation multiples',
+      title: 'Comparing your multipliers...',
       description: 'Applying advanced valuation methodologies...'
     },
     {
@@ -108,7 +108,7 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
 
         <div className="space-y-4">
           <Progress value={progress} className="h-3" />
-          <p className="text-sm text-muted-foreground">{progress}% Complete</p>
+          <p className="text-sm text-muted-foreground">Progress: {progress}%</p>
         </div>
 
         <div className="space-y-4">
@@ -143,13 +143,13 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
         {progress > 80 && (
           <div className="bg-gradient-to-r from-primary-light/20 to-primary/20 rounded-lg p-6 animate-fade-in">
             <h3 className="text-xl font-bold text-foreground mb-2">
-              Preliminary Valuation Range
+              Did you know that 97% of SaaS founders undervalue their companies? You're about to find out which side you're on...
             </h3>
             <p className="text-3xl font-bold text-primary">
               ${estimatedValue - 2}M - ${estimatedValue + 5}M
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              Final report will include detailed breakdown and methodology
+              Preliminary Valuation Range
             </p>
           </div>
         )}
