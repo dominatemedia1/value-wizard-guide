@@ -19,6 +19,11 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
     }
   };
 
+  const formatNumber = (num: number): string => {
+    if (num === 0) return '';
+    return new Intl.NumberFormat('en-US').format(num);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/[^0-9]/g, '');
     onCACChange(Number(inputValue));
@@ -40,14 +45,17 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
           <label className="text-sm font-medium text-foreground">
             Customer Acquisition Cost ($)
           </label>
-          <Input
-            type="text"
-            placeholder="Enter your CAC"
-            value={cac || ''}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            className="text-lg py-3"
-          />
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-lg">$</span>
+            <Input
+              type="text"
+              placeholder="Enter your CAC"
+              value={formatNumber(cac)}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              className="text-lg py-3 pl-8"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">

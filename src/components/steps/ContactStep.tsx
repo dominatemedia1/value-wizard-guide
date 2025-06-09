@@ -56,8 +56,9 @@ const ContactStep = ({
   }, [onFirstNameChange, onEmailChange, onPhoneChange]);
 
   const isValidWebsite = (url: string): boolean => {
+    const lowerUrl = url.toLowerCase();
     const pattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    return pattern.test(url) && url.includes('.');
+    return pattern.test(lowerUrl) && lowerUrl.includes('.');
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {

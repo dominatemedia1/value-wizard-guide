@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 
 interface GrowthRateStepProps {
   value: number;
@@ -10,17 +10,8 @@ interface GrowthRateStepProps {
 }
 
 const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && value > 0) {
-      onNext();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.replace(/[^0-9]/g, '');
-    const numValue = Number(inputValue);
-    // Cap at 999% for reasonable input
-    onChange(Math.min(999, numValue));
+  const handleSliderChange = (values: number[]) => {
+    onChange(values[0]);
   };
 
   return (
@@ -35,18 +26,27 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-2">
+        <div className="space-y-4">
           <label className="text-sm font-medium text-foreground">
-            Annual Growth Rate (%)
+            Annual Growth Rate: {value}%
           </label>
-          <Input
-            type="text"
-            placeholder="Enter growth percentage"
-            value={value || ''}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            className="text-lg py-3"
-          />
+          <div className="px-4">
+            <Slider
+              value={[value]}
+              onValueChange={handleSliderChange}
+              max={200}
+              min={0}
+              step={1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+              <span>150%</span>
+              <span>200%</span>
+            </div>
+          </div>
         </div>
 
         {value > 0 && (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -165,11 +166,12 @@ const ValuationGuide = () => {
       // Always show results waiting regardless of webhook success
       setShowResultsWaiting(true);
       
-      // Set a minimum 10-minute timer before any results could potentially be shown
+      // Set a random timer between 7-12 minutes
+      const randomMinutes = Math.floor(Math.random() * (12 - 7 + 1)) + 7;
       setTimeout(() => {
-        console.log('Minimum 10 minutes elapsed');
+        console.log(`Random ${randomMinutes} minutes elapsed`);
         // In a real implementation, you might check for results here
-      }, 10 * 60 * 1000); // 10 minutes
+      }, randomMinutes * 60 * 1000);
     } else if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }

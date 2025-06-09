@@ -16,6 +16,11 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
     }
   };
 
+  const formatNumber = (num: number): string => {
+    if (num === 0) return '';
+    return new Intl.NumberFormat('en-US').format(num);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/[^0-9]/g, '');
     onChange(Number(inputValue));
@@ -37,14 +42,17 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
           <label className="text-sm font-medium text-foreground">
             Annual Recurring Revenue ($)
           </label>
-          <Input
-            type="text"
-            placeholder="Enter your ARR"
-            value={value || ''}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            className="text-lg py-3"
-          />
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-lg">$</span>
+            <Input
+              type="text"
+              placeholder="Enter your ARR"
+              value={formatNumber(value)}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              className="text-lg py-3 pl-8"
+            />
+          </div>
         </div>
 
         {value > 0 && (
