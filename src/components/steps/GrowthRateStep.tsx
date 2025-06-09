@@ -42,7 +42,7 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h3 className="text-xl text-foreground">
+        <h3 className="text-2xl font-bold text-foreground">
           What's your quarter-over-quarter growth rate?
         </h3>
         <p className="text-muted-foreground">

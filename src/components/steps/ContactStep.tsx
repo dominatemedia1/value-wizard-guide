@@ -85,7 +85,7 @@ const ContactStep = ({
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h3 className="text-xl text-foreground">
+        <h3 className="text-2xl font-bold text-foreground">
           Last step, {displayFirstName || firstName || 'friend'} (pinky promise). Simply enter your details below!
         </h3>
         <p className="text-muted-foreground">
@@ -98,7 +98,7 @@ const ContactStep = ({
           <>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                First Name**
+                First Name*
               </label>
               <Input
                 type="text"
@@ -112,7 +112,7 @@ const ContactStep = ({
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Email
+                Email*
               </label>
               <Input
                 type="email"

@@ -37,7 +37,7 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h3 className="text-xl text-foreground">
+        <h3 className="text-2xl font-bold text-foreground">
           What's your current Customer Acquisition Cost (CAC)?
         </h3>
         <p className="text-muted-foreground">
