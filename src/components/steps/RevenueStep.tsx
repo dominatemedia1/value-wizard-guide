@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 
 interface RevenueStepProps {
   value: number;
@@ -16,18 +16,22 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
     }
   };
 
-  const formatNumber = (num: number): string => {
-    if (num === 0) return '';
-    return new Intl.NumberFormat('en-US').format(num);
+  const handleSliderChange = (values: number[]) => {
+    onChange(values[0]);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.replace(/[^0-9]/g, '');
-    onChange(Number(inputValue));
+  const formatNumber = (num: number): string => {
+    if (num === 0) return '$0';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" onKeyPress={handleKeyPress} tabIndex={0}>
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
           What's your current Annual Recurring Revenue?
@@ -38,20 +42,26 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-2">
+        <div className="space-y-4">
           <label className="text-sm font-medium text-foreground">
-            Annual Recurring Revenue ($)
+            Annual Recurring Revenue: {formatNumber(value)}
           </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-lg">$</span>
-            <Input
-              type="text"
-              placeholder="Enter your ARR"
-              value={formatNumber(value)}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              className="text-lg py-3 pl-8"
+          <div className="px-4">
+            <Slider
+              value={[value]}
+              onValueChange={handleSliderChange}
+              max={10000000}
+              min={0}
+              step={10000}
+              className="w-full"
             />
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+              <span>$0</span>
+              <span>$2.5M</span>
+              <span>$5M</span>
+              <span>$7.5M</span>
+              <span>$10M</span>
+            </div>
           </div>
         </div>
 
