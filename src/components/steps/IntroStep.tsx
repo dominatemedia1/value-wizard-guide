@@ -15,13 +15,19 @@ const IntroStep = ({ onNext }: IntroStepProps) => {
           <TrendingUp className="w-10 h-10 text-primary" />
         </div>
         
-        <h1 className="text-4xl font-bold text-foreground mb-4">
-          Discover Your Company's True Value
-        </h1>
-        
-        <p className="text-xl text-muted-foreground max-w-md mx-auto leading-relaxed">
-          Get an accurate valuation of your business in just 5 minutes using our proven methodology trusted by thousands of entrepreneurs.
-        </p>
+        <div className="space-y-2">
+          <p className="text-lg font-semibold text-muted-foreground">
+            YOU'RE ONE STEP CLOSER TO YOUR…
+          </p>
+          
+          <h1 className="text-4xl font-bold text-foreground mb-4">
+            FREE AI SAAS VALUATION CALCULATOR
+          </h1>
+          
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Claim your 100% FREE no-bullsh*t AI-powered valuation calculator and growth map ($497 value). This is strictly for founders who are hungry for the exact formula that 2,847 SaaS companies used to explode their enterprise value and market share!
+          </p>
+        </div>
       </div>
 
       <div className="bg-muted/50 rounded-lg p-6 max-w-sm mx-auto">
