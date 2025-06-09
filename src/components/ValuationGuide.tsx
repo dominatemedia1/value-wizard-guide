@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -163,14 +164,16 @@ const ValuationGuide = () => {
         console.log("Webhook success: true");
         document.body.setAttribute("data-webhook-success", "true");
         
-        // After webhook success
-        window.parent.postMessage({ action: "webhookSuccess" }, "*");
+        // After webhook success - properly typed postMessage
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ action: "webhookSuccess" }, "*");
+        }
         
         // Check if revenue is $250K or above to set the flag
         if (data.revenue >= 250000) {
           console.log('💰 Revenue qualifies! Setting webhookSuccessFlag to true');
-          window.webhookSuccessFlag = true;
-          console.log('🏁 Flag set! Current value:', window.webhookSuccessFlag);
+          (window as any).webhookSuccessFlag = true;
+          console.log('🏁 Flag set! Current value:', (window as any).webhookSuccessFlag);
         } else {
           console.log('💸 Revenue below $250K, not setting flag');
         }
