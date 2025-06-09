@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface RevenueStepProps {
   value: number;
@@ -16,10 +16,6 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
     }
   };
 
-  const handleSliderChange = (values: number[]) => {
-    onChange(values[0]);
-  };
-
   const formatNumber = (num: number): string => {
     if (num === 0) return '$0';
     return new Intl.NumberFormat('en-US', {
@@ -29,6 +25,16 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
       maximumFractionDigits: 0,
     }).format(num);
   };
+
+  const revenueOptions = [
+    { value: 0, label: '$0 - Just Starting' },
+    { value: 100000, label: '$100K - $500K' },
+    { value: 500000, label: '$500K - $1M' },
+    { value: 1000000, label: '$1M - $2M' },
+    { value: 2000000, label: '$2M - $5M' },
+    { value: 5000000, label: '$5M - $10M' },
+    { value: 10000000, label: '$10M+' }
+  ];
 
   return (
     <div className="space-y-8" onKeyPress={handleKeyPress} tabIndex={0}>
@@ -41,38 +47,38 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
         </p>
       </div>
 
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <label className="text-sm font-medium text-foreground">
-            Annual Recurring Revenue: {formatNumber(value)}
-          </label>
-          <div className="px-4">
-            <Slider
-              value={[value]}
-              onValueChange={handleSliderChange}
-              max={10000000}
-              min={0}
-              step={10000}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground mt-2">
-              <span>$0</span>
-              <span>$2.5M</span>
-              <span>$5M</span>
-              <span>$7.5M</span>
-              <span>$10M</span>
-            </div>
-          </div>
-        </div>
-
-        {value > 0 && (
-          <div className="bg-muted/50 rounded-lg p-4">
-            <p className="text-sm text-muted-foreground">
-              💡 <strong>AI Insight:</strong> Your revenue scale helps our AI determine appropriate valuation multiples and growth benchmarks.
-            </p>
-          </div>
-        )}
+      <div className="space-y-4">
+        {revenueOptions.map((option) => (
+          <Card
+            key={option.value}
+            className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+              value === option.value 
+                ? 'ring-2 ring-primary bg-primary-light/10' 
+                : 'hover:shadow-md'
+            }`}
+            onClick={() => onChange(option.value)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-4 h-4 rounded-full border-2 ${
+                  value === option.value 
+                    ? 'bg-primary border-primary' 
+                    : 'border-muted-foreground'
+                }`} />
+                <h3 className="font-semibold text-foreground text-lg">{option.label}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      {value > 0 && (
+        <div className="bg-muted/50 rounded-lg p-4">
+          <p className="text-sm text-muted-foreground">
+            💡 <strong>AI Insight:</strong> Your revenue scale helps our AI determine appropriate valuation multiples and growth benchmarks.
+          </p>
+        </div>
+      )}
 
       <Button 
         onClick={onNext}
