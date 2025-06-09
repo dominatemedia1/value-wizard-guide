@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -106,6 +107,9 @@ const ValuationGuide = () => {
 
   const sendWebhook = async (data: ValuationData) => {
     try {
+      console.log('🚀 Starting webhook process...');
+      console.log('Revenue check:', data.revenue, 'is >= 250000?', data.revenue >= 250000);
+      
       // Calculate valuation using your formula
       const brandScore = getBrandScore(data.networkEffects);
       const isB2B = data.businessModel === 'b2b';
@@ -160,8 +164,11 @@ const ValuationGuide = () => {
         
         // Check if revenue is $250K or above to set the flag
         if (data.revenue >= 250000) {
-          console.log('Webhook success: true');
+          console.log('💰 Revenue qualifies! Setting webhookSuccessFlag to true');
           window.webhookSuccessFlag = true;
+          console.log('🏁 Flag set! Current value:', window.webhookSuccessFlag);
+        } else {
+          console.log('💸 Revenue below $250K, not setting flag');
         }
       } else {
         console.log('❌ Webhook failed to send');
