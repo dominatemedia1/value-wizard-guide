@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { ChevronLeft } from 'lucide-react';
 import IntroStep from './steps/IntroStep';
 import RevenueStep from './steps/RevenueStep';
 import CACStep from './steps/CACStep';
@@ -15,6 +15,7 @@ import ResultsWaiting from './steps/ResultsWaiting';
 import ExitPopup from './ExitPopup';
 import { calculateValuation } from '../utils/valuationCalculator';
 import { webflowControl, initWebflowListener } from '../utils/webflowIntegration';
+import { saveValuationData, loadValuationData, clearValuationData } from '../utils/cookieStorage';
 
 export interface ValuationData {
   revenue: number;
@@ -34,6 +35,7 @@ const ValuationGuide = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showResultsWaiting, setShowResultsWaiting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [valuationData, setValuationData] = useState<ValuationData>({
     revenue: 0,
     cac: 0,
@@ -50,6 +52,30 @@ const ValuationGuide = () => {
 
   const totalSteps = 8;
   const progress = (currentStep / (totalSteps - 1)) * 100;
+
+  // Load data from cookies on component mount
+  useEffect(() => {
+    const savedData = loadValuationData();
+    if (savedData) {
+      setValuationData(savedData.valuationData || valuationData);
+      setCurrentStep(savedData.currentStep || 0);
+      setIsSubmitted(savedData.isSubmitted || false);
+      if (savedData.isSubmitted) {
+        setShowResultsWaiting(true);
+      }
+    }
+  }, []);
+
+  // Save data to cookies whenever valuationData or currentStep changes
+  useEffect(() => {
+    if (currentStep > 0 && !isSubmitted) {
+      saveValuationData({
+        valuationData,
+        currentStep,
+        isSubmitted
+      });
+    }
+  }, [valuationData, currentStep, isSubmitted]);
 
   useEffect(() => {
     // Initialize Webflow listener
@@ -129,7 +155,12 @@ const ValuationGuide = () => {
       });
 
       console.log('Webhook response status:', response.status);
-      console.log('Webhook sent successfully');
+      
+      if (response.ok) {
+        console.log('✅ Webhook sent successfully to the system!');
+      } else {
+        console.log('❌ Webhook failed to send');
+      }
 
       // Notify Webflow of form submission
       webflowControl.formSubmitted(webhookData);
@@ -141,6 +172,7 @@ const ValuationGuide = () => {
       return true;
     } catch (error) {
       console.error('Error sending webhook:', error);
+      console.log('❌ Webhook failed to send due to error');
       return false;
     }
   };
@@ -158,6 +190,14 @@ const ValuationGuide = () => {
 
   const nextStep = async () => {
     if (currentStep === 6) { // Contact step
+      // Mark as submitted and clear cookies for form data (but keep submitted state)
+      setIsSubmitted(true);
+      saveValuationData({
+        valuationData,
+        currentStep,
+        isSubmitted: true
+      });
+      
       // Send webhook and show results waiting
       console.log('Attempting to send webhook...');
       const success = await sendWebhook(valuationData);
@@ -177,11 +217,19 @@ const ValuationGuide = () => {
     }
   };
 
+  const previousStep = () => {
+    if (currentStep > 0 && !isSubmitted) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const updateValuationData = (field: keyof ValuationData, value: any) => {
-    setValuationData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (!isSubmitted) {
+      setValuationData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const renderStep = () => {
@@ -259,7 +307,7 @@ const ValuationGuide = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl mx-auto shadow-2xl border-0 bg-card/95 backdrop-blur-sm">
+      <Card className="w-full max-w-2xl mx-auto border-2 border-border bg-card/95 backdrop-blur-sm">
         <CardContent className="p-8">
           {currentStep > 0 && currentStep < totalSteps - 1 && !showResultsWaiting && (
             <div className="mb-8">
@@ -272,6 +320,18 @@ const ValuationGuide = () => {
                 </span>
               </div>
               <Progress value={progress} className="h-2" />
+              
+              {currentStep > 1 && !isSubmitted && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={previousStep}
+                  className="mt-4 text-muted-foreground hover:text-foreground border border-border hover:border-primary transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Back
+                </Button>
+              )}
             </div>
           )}
           

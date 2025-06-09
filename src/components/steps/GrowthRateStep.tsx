@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 
 interface GrowthRateStepProps {
   value: number;
@@ -12,6 +13,13 @@ interface GrowthRateStepProps {
 const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
   const handleSliderChange = (values: number[]) => {
     onChange(values[0]);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = parseFloat(e.target.value) || 0;
+    if (inputValue >= 0 && inputValue <= 200) {
+      onChange(inputValue);
+    }
   };
 
   const quickSelectOptions = [
@@ -39,8 +47,23 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
       <div className="space-y-6">
         <div className="space-y-4">
           <label className="text-sm font-medium text-foreground">
-            Annual Growth Rate: {value}%
+            Annual Growth Rate
           </label>
+          
+          <div className="flex items-center space-x-4">
+            <Input
+              type="number"
+              min="0"
+              max="200"
+              step="0.1"
+              value={value}
+              onChange={handleInputChange}
+              className="w-24 text-center border-2 border-border hover:border-primary focus:border-primary transition-colors"
+              placeholder="0"
+            />
+            <span className="text-sm text-muted-foreground">%</span>
+          </div>
+
           <div className="px-4">
             <Slider
               value={[value]}
@@ -69,7 +92,7 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
                 variant={value === option.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => onChange(option.value)}
-                className="h-8 text-xs"
+                className="h-8 text-xs border-2 border-border hover:border-primary transition-colors"
               >
                 {option.label}
               </Button>
@@ -78,7 +101,7 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
         </div>
 
         {value > 0 && (
-          <div className="bg-muted/50 rounded-lg p-4">
+          <div className="bg-muted/50 rounded-lg p-4 border-2 border-border">
             <p className="text-sm text-muted-foreground">
               💡 <strong>AI Analysis:</strong> Growth rates above 40% typically command premium valuations in our AI model, while sustainable 20%+ growth is considered healthy.
             </p>
@@ -89,7 +112,7 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
       <Button 
         onClick={onNext}
         disabled={value === 0}
-        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold"
+        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold border-2 border-transparent hover:border-primary transition-colors"
       >
         Continue →
       </Button>

@@ -88,7 +88,7 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
                 variant={value === option.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => onChange(option.value)}
-                className="h-8 text-xs"
+                className="h-8 text-xs border-2 border-border hover:border-primary transition-colors"
               >
                 {option.label}
               </Button>
@@ -97,7 +97,7 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
         </div>
 
         {value > 0 && (
-          <div className="bg-muted/50 rounded-lg p-4">
+          <div className="bg-muted/50 rounded-lg p-4 border-2 border-border">
             <p className="text-sm text-muted-foreground">
               💡 <strong>AI Insight:</strong> Your revenue scale helps our AI determine appropriate valuation multiples and growth benchmarks.
             </p>
@@ -108,7 +108,7 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
       <Button 
         onClick={onNext}
         disabled={value === 0}
-        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold"
+        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold border-2 border-transparent hover:border-primary transition-colors"
       >
         Continue →
       </Button>
