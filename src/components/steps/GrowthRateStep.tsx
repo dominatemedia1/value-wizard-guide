@@ -14,6 +14,17 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
     onChange(values[0]);
   };
 
+  const quickSelectOptions = [
+    { value: 0, label: '0%' },
+    { value: 10, label: '10%' },
+    { value: 25, label: '25%' },
+    { value: 50, label: '50%' },
+    { value: 75, label: '75%' },
+    { value: 100, label: '100%' },
+    { value: 150, label: '150%' },
+    { value: 200, label: '200%+' }
+  ];
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
@@ -46,6 +57,23 @@ const GrowthRateStep = ({ value, onChange, onNext }: GrowthRateStepProps) => {
               <span>150%</span>
               <span>200%</span>
             </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-foreground">Quick Select:</p>
+          <div className="grid grid-cols-4 gap-2">
+            {quickSelectOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant={value === option.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => onChange(option.value)}
+                className="h-8 text-xs"
+              >
+                {option.label}
+              </Button>
+            ))}
           </div>
         </div>
 

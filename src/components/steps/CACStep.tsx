@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface CACStepProps {
@@ -19,15 +20,35 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
     }
   };
 
+  const handleSliderChange = (values: number[]) => {
+    onCACChange(values[0]);
+  };
+
   const formatNumber = (num: number): string => {
-    if (num === 0) return '';
-    return new Intl.NumberFormat('en-US').format(num);
+    if (num === 0) return '$0';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/[^0-9]/g, '');
     onCACChange(Number(inputValue));
   };
+
+  const quickSelectOptions = [
+    { value: 0, label: '$0' },
+    { value: 50, label: '$50' },
+    { value: 100, label: '$100' },
+    { value: 250, label: '$250' },
+    { value: 500, label: '$500' },
+    { value: 1000, label: '$1K' },
+    { value: 2500, label: '$2.5K' },
+    { value: 5000, label: '$5K+' }
+  ];
 
   return (
     <div className="space-y-8">
@@ -41,16 +62,56 @@ const CACStep = ({ cac, context, onCACChange, onContextChange, onNext }: CACStep
       </div>
 
       <div className="space-y-6">
+        <div className="space-y-4">
+          <label className="text-sm font-medium text-foreground">
+            Customer Acquisition Cost: {formatNumber(cac)}
+          </label>
+          <div className="px-4">
+            <Slider
+              value={[cac]}
+              onValueChange={handleSliderChange}
+              max={5000}
+              min={0}
+              step={10}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+              <span>$0</span>
+              <span>$1.25K</span>
+              <span>$2.5K</span>
+              <span>$3.75K</span>
+              <span>$5K</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-foreground">Quick Select:</p>
+          <div className="grid grid-cols-4 gap-2">
+            {quickSelectOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant={cac === option.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => onCACChange(option.value)}
+                className="h-8 text-xs"
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Customer Acquisition Cost ($)
+            Or enter manually ($)
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-lg">$</span>
             <Input
               type="text"
               placeholder="Enter your CAC"
-              value={formatNumber(cac)}
+              value={formatNumber(cac).replace('$', '')}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               className="text-lg py-3 pl-8"
