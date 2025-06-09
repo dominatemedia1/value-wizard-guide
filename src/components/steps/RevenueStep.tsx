@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 
 interface RevenueStepProps {
   value: number;
@@ -18,6 +19,11 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
 
   const handleSliderChange = (values: number[]) => {
     onChange(values[0]);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.replace(/[^0-9]/g, '');
+    onChange(Number(inputValue));
   };
 
   const formatNumber = (num: number): string => {
@@ -48,18 +54,18 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
     <div className="space-y-8" onKeyPress={handleKeyPress} tabIndex={0}>
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
-          What's your current Annual Recurring Revenue?
+          What is your current ANNUAL recurring revenue (ARR)?
         </h2>
         <p className="text-muted-foreground">
-          This helps our AI analyze your company's revenue scale and market position.
+          We're asking you this so we can provide accurate valuation benchmarks that are going to have a meaningful impact on your company's enterprise value.
         </p>
       </div>
 
       <div className="space-y-6">
         <div className="space-y-4">
-          <label className="text-sm font-medium text-foreground">
-            Annual Recurring Revenue: {formatNumber(value)}
-          </label>
+          <div className="text-center">
+            <span className="text-2xl font-bold text-foreground">{formatNumber(value)}</span>
+          </div>
           <div className="px-4">
             <Slider
               value={[value]}
@@ -88,7 +94,7 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
                 variant={value === option.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => onChange(option.value)}
-                className="h-8 text-xs border-2 border-border hover:border-primary transition-colors"
+                className="h-8 text-xs border border-border hover:border-primary transition-colors"
               >
                 {option.label}
               </Button>
@@ -96,8 +102,25 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            Or enter manually ($)
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-lg">$</span>
+            <Input
+              type="text"
+              placeholder="Enter your ARR"
+              value={formatNumber(value).replace('$', '')}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              className="text-lg py-3 pl-8 border border-border hover:border-primary focus:border-primary transition-colors"
+            />
+          </div>
+        </div>
+
         {value > 0 && (
-          <div className="bg-muted/50 rounded-lg p-4 border-2 border-border">
+          <div className="bg-muted/50 rounded-lg p-4 border border-border">
             <p className="text-sm text-muted-foreground">
               💡 <strong>AI Insight:</strong> Your revenue scale helps our AI determine appropriate valuation multiples and growth benchmarks.
             </p>
@@ -108,7 +131,7 @@ const RevenueStep = ({ value, onChange, onNext }: RevenueStepProps) => {
       <Button 
         onClick={onNext}
         disabled={value === 0}
-        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold border-2 border-transparent hover:border-primary transition-colors"
+        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold border border-transparent hover:border-primary transition-colors"
       >
         Continue →
       </Button>

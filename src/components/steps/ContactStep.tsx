@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Shield, Mail } from 'lucide-react';
@@ -31,7 +31,8 @@ const ContactStep = ({
   onWebsiteChange, 
   onNext 
 }: ContactStepProps) => {
-  const [showContactFields, setShowContactFields] = React.useState(true);
+  const [showContactFields, setShowContactFields] = useState(true);
+  const [displayFirstName, setDisplayFirstName] = useState('');
 
   useEffect(() => {
     // Check for UTM parameters
@@ -43,6 +44,7 @@ const ContactStep = ({
     // If UTM parameters exist and are not empty, populate the fields and hide them
     if (utmFirstName && utmFirstName.trim() !== '') {
       onFirstNameChange(utmFirstName);
+      setDisplayFirstName(utmFirstName);
       setShowContactFields(false);
     }
     if (utmEmail && utmEmail.trim() !== '') {
@@ -84,10 +86,13 @@ const ContactStep = ({
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
-          Almost there! Get your personalized AI valuation report
+          FULL OPT-IN
         </h2>
+        <h3 className="text-xl text-foreground">
+          Last step, {displayFirstName || firstName || 'friend'} (pinky promise). Simply enter your details below!
+        </h3>
         <p className="text-muted-foreground">
-          Our AI will analyze your data and generate a comprehensive valuation report with actionable insights.
+          Please fill out your details and we'll send you that valuation report to your inbox faster than you can say "califragilisticexpialidocious".
         </p>
       </div>
 
@@ -96,7 +101,7 @@ const ContactStep = ({
           <>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                First Name *
+                First Name (Hidden)**
               </label>
               <Input
                 type="text"
@@ -104,13 +109,13 @@ const ContactStep = ({
                 value={firstName}
                 onChange={(e) => onFirstNameChange(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="text-lg py-3"
+                className="text-lg py-3 border border-border hover:border-primary focus:border-primary transition-colors"
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Email *
+                Email (Hidden)
               </label>
               <Input
                 type="email"
@@ -118,13 +123,13 @@ const ContactStep = ({
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="text-lg py-3"
+                className="text-lg py-3 border border-border hover:border-primary focus:border-primary transition-colors"
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Phone *
+                Mobile (Hidden)*
               </label>
               <Input
                 type="tel"
@@ -132,7 +137,7 @@ const ContactStep = ({
                 value={phone}
                 onChange={handlePhoneChange}
                 onKeyPress={handleKeyPress}
-                className="text-lg py-3"
+                className="text-lg py-3 border border-border hover:border-primary focus:border-primary transition-colors"
               />
             </div>
           </>
@@ -140,7 +145,7 @@ const ContactStep = ({
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Company Name *
+            Company Name*
           </label>
           <Input
             type="text"
@@ -148,13 +153,13 @@ const ContactStep = ({
             value={companyName}
             onChange={(e) => onCompanyNameChange(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="text-lg py-3"
+            className="text-lg py-3 border border-border hover:border-primary focus:border-primary transition-colors"
           />
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Website *
+            Website*
           </label>
           <Input
             type="url"
@@ -162,14 +167,14 @@ const ContactStep = ({
             value={website}
             onChange={(e) => onWebsiteChange(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="text-lg py-3"
+            className="text-lg py-3 border border-border hover:border-primary focus:border-primary transition-colors"
           />
           {website && !isValidWebsite(website) && (
             <p className="text-sm text-destructive">Please enter a valid website URL (e.g., company.com)</p>
           )}
         </div>
 
-        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+        <div className="bg-muted/50 rounded-lg p-4 space-y-3 border border-border">
           <div className="flex items-center space-x-2">
             <Shield className="w-5 h-5 text-primary" />
             <span className="font-medium text-foreground">Your data is secure</span>
@@ -181,7 +186,7 @@ const ContactStep = ({
           </ul>
         </div>
 
-        <div className="bg-primary-light/20 rounded-lg p-4">
+        <div className="bg-primary-light/20 rounded-lg p-4 border border-border">
           <div className="flex items-start space-x-3">
             <Mail className="w-5 h-5 text-primary mt-0.5" />
             <div>
@@ -200,9 +205,9 @@ const ContactStep = ({
       <Button 
         onClick={onNext}
         disabled={!isValid}
-        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold"
+        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold border border-transparent hover:border-primary transition-colors"
       >
-        Generate My AI Valuation Report →
+        Calculate My Valuation →
       </Button>
     </div>
   );

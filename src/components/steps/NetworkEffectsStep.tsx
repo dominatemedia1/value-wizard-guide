@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -10,26 +10,38 @@ interface NetworkEffectsStepProps {
 }
 
 const NetworkEffectsStep = ({ value, onChange, onNext }: NetworkEffectsStepProps) => {
+  const [firstName, setFirstName] = useState('');
+
+  useEffect(() => {
+    // Check for UTM parameters for first name
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmFirstName = urlParams.get('first_name');
+    
+    if (utmFirstName && utmFirstName.trim() !== '') {
+      setFirstName(utmFirstName);
+    }
+  }, []);
+
   const options = [
     {
-      id: 'strong',
-      title: 'Strong Market Presence',
-      description: 'Well-known brand, significant market share, loyal customer base'
-    },
-    {
-      id: 'moderate',
-      title: 'Moderate Market Presence',
-      description: 'Growing brand recognition, established in niche markets'
+      id: 'invisible',
+      title: 'Invisible',
+      description: 'Prospects have never heard of us'
     },
     {
       id: 'emerging',
-      title: 'Emerging Market Presence',
-      description: 'Building brand awareness, early-stage market penetration'
+      title: 'Emerging',
+      description: 'Some recognition in our niche'
     },
     {
-      id: 'limited',
-      title: 'Limited Market Presence',
-      description: 'New to market, minimal brand recognition'
+      id: 'established',
+      title: 'Established',
+      description: 'Well-known in our market'
+    },
+    {
+      id: 'dominant',
+      title: 'Dominant',
+      description: 'Clear thought leader/category king'
     }
   ];
 
@@ -37,10 +49,13 @@ const NetworkEffectsStep = ({ value, onChange, onNext }: NetworkEffectsStepProps
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
-          How would you rate your brand's market presence?
+          NETWORK EFFECTS (BRAND PRESENCE)
         </h2>
+        <h3 className="text-xl text-foreground">
+          {firstName ? `${firstName}, be honest...` : 'Be honest...'} How would you rate your brand's online presence and authority?
+        </h3>
         <p className="text-muted-foreground">
-          Network effects and brand strength significantly impact valuation multiples.
+          Don't skip the details. Are you invisible & undervalued or are you the first thought that prospects have when facing a problem?
         </p>
       </div>
 
@@ -48,10 +63,10 @@ const NetworkEffectsStep = ({ value, onChange, onNext }: NetworkEffectsStepProps
         {options.map((option) => (
           <Card
             key={option.id}
-            className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+            className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] border ${
               value === option.id 
-                ? 'ring-2 ring-primary bg-primary-light/10' 
-                : 'hover:shadow-md'
+                ? 'border-primary bg-primary-light/10' 
+                : 'border-border hover:border-primary hover:shadow-md'
             }`}
             onClick={() => onChange(option.id)}
           >
@@ -75,7 +90,7 @@ const NetworkEffectsStep = ({ value, onChange, onNext }: NetworkEffectsStepProps
       <Button 
         onClick={onNext}
         disabled={!value}
-        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold"
+        className="w-full bg-primary hover:bg-primary-dark text-white py-3 text-lg font-semibold border border-transparent hover:border-primary transition-colors"
       >
         Continue →
       </Button>

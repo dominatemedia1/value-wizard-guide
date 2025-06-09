@@ -157,7 +157,13 @@ const ValuationGuide = () => {
       console.log('Webhook response status:', response.status);
       
       if (response.ok) {
-        console.log('✅ Webhook sent successfully to the system!');
+        // Check if revenue is less than $250K to determine log message
+        if (data.revenue < 250000) {
+          console.log('✅ Webhook sent successfully to the system!');
+        } else {
+          console.log('✅ Webhook sent successfully to the system!');
+          console.log('Webhook success: true');
+        }
       } else {
         console.log('❌ Webhook failed to send');
       }
@@ -180,9 +186,9 @@ const ValuationGuide = () => {
   const getBrandScore = (networkEffects: string): number => {
     // Convert network effects to a score between 0-4
     const scoreMap: { [key: string]: number } = {
-      'minimal': 1,
-      'moderate': 2,
-      'strong': 3,
+      'invisible': 1,
+      'emerging': 2,
+      'established': 3,
       'dominant': 4
     };
     return scoreMap[networkEffects] || 0;
