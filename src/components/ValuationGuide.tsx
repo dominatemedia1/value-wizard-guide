@@ -165,6 +165,10 @@ const ValuationGuide = () => {
         console.log("Webhook success: true");
         document.body.setAttribute("data-webhook-success", "true");
         
+        // After webhook success
+        console.log("Webhook success: true");
+        window.parent.postMessage({ action: "webhookSuccess" }, "*");
+        
         // Check if revenue is $250K or above to set the flag
         if (data.revenue >= 250000) {
           console.log('💰 Revenue qualifies! Setting webhookSuccessFlag to true');
