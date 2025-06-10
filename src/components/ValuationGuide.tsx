@@ -72,31 +72,35 @@ const ValuationGuide = () => {
 
   // Load data from cookies on component mount
   useEffect(() => {
+    console.log('🚀 Component mounting, checking for saved data...');
     const savedData = loadValuationData();
     if (savedData) {
-      console.log('Loading saved data from cookies:', savedData);
+      console.log('📦 Loading saved data from storage:', savedData);
       setValuationData(savedData.valuationData || valuationData);
       setCurrentStep(savedData.currentStep || 0);
       setIsSubmitted(savedData.isSubmitted || false);
       
       // If they already submitted, show results immediately and post webhook success message
       if (savedData.isSubmitted) {
-        console.log('User already submitted, showing results without webhook');
+        console.log('✅ User already submitted, showing results without webhook');
         setShowResults(true);
         setShowResultsWaiting(false);
         
         // Post webhook success message for returning users who completed the process
-        console.log('Posting webhook success message for returning user');
+        console.log('📡 Posting webhook success message for returning user');
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ action: "webhookSuccess" }, "*");
         }
       }
+    } else {
+      console.log('📭 No saved data found, starting fresh');
     }
   }, []);
 
-  // Save data to cookies whenever valuationData, currentStep, or submission status changes
+  // Save data to storage whenever valuationData, currentStep, or submission status changes
   useEffect(() => {
-    if (currentStep >= 0) {
+    // Only save if we have meaningful data (not initial state)
+    if (currentStep > 0 || valuationData.arrSliderValue > 0 || isSubmitted) {
       const dataToSave = {
         valuationData,
         currentStep,
@@ -106,8 +110,9 @@ const ValuationGuide = () => {
         submittedAt: isSubmitted ? new Date().toISOString() : undefined
       };
       
-      saveValuationData(dataToSave);
-      console.log('Saved data to cookies:', dataToSave);
+      console.log('💾 Auto-saving data to storage...', dataToSave);
+      const saveSuccess = saveValuationData(dataToSave);
+      console.log('💾 Save result:', saveSuccess ? 'success' : 'failed');
     }
   }, [valuationData, currentStep, isSubmitted, showResultsWaiting, showResults]);
 
@@ -281,13 +286,14 @@ const ValuationGuide = () => {
 
   const nextStep = async () => {
     if (currentStep === 8) { // Final contact step
-      // Mark as submitted and save to cookies
+      // Mark as submitted and save to storage
+      console.log('📝 Marking submission as complete');
       setIsSubmitted(true);
       
       // Send webhook for new submissions (not returning users)
-      console.log('Attempting to send webhook...');
+      console.log('📡 Attempting to send webhook...');
       const success = await sendWebhook(valuationData);
-      console.log('Webhook success:', success);
+      console.log('📡 Webhook success:', success);
       
       // Always show results waiting for new submissions
       setShowResultsWaiting(true);
@@ -297,24 +303,27 @@ const ValuationGuide = () => {
       
       // Set timer for 5 seconds
       setTimeout(() => {
-        console.log('5 seconds elapsed, showing results');
+        console.log('⏰ 5 seconds elapsed, showing results');
         setShowResultsWaiting(false);
         setShowResults(true);
         localStorage.removeItem('valuation_start_time');
       }, 5000);
     } else if (currentStep < totalSteps - 1) {
+      console.log(`➡️ Moving to step ${currentStep + 1}`);
       setCurrentStep(currentStep + 1);
     }
   };
 
   const previousStep = () => {
     if (currentStep > 0 && !isSubmitted) {
+      console.log(`⬅️ Moving back to step ${currentStep - 1}`);
       setCurrentStep(currentStep - 1);
     }
   };
 
   const updateValuationData = (field: keyof ValuationData, value: any) => {
     if (!isSubmitted) {
+      console.log(`📝 Updating ${field} to:`, value);
       setValuationData(prev => ({
         ...prev,
         [field]: value
