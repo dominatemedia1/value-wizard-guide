@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { validateContactForm, ValidationResult } from '@/utils/formValidation';
 import LoadingState from '@/components/LoadingState';
-import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, ChevronLeft } from 'lucide-react';
 
 interface FinalContactStepProps {
   firstName: string;
@@ -22,12 +22,13 @@ interface FinalContactStepProps {
   onCompanyNameChange: (value: string) => void;
   onWebsiteChange: (value: string) => void;
   onNext: () => void;
+  onBack?: () => void;
 }
 
 const FinalContactStep = ({ 
   firstName, lastName, email, phone, companyName, website,
   onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, 
-  onCompanyNameChange, onWebsiteChange, onNext 
+  onCompanyNameChange, onWebsiteChange, onNext, onBack 
 }: FinalContactStepProps) => {
   const [validation, setValidation] = useState<ValidationResult>({ isValid: false, errors: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +40,7 @@ const FinalContactStep = ({
       firstName, lastName, email, phone, companyName, website
     });
     setValidation(result);
+    console.log('Validation result:', result);
   }, [firstName, lastName, email, phone, companyName, website]);
 
   const handleFieldBlur = (fieldName: string) => {
@@ -46,10 +48,26 @@ const FinalContactStep = ({
   };
 
   const handleSubmit = async () => {
-    if (!validation.isValid) return;
+    console.log('Submit clicked, validation:', validation);
+    
+    // Mark all fields as touched to show validation errors
+    setTouched({
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      companyName: true,
+      website: true
+    });
+
+    if (!validation.isValid) {
+      console.log('Form validation failed:', validation.errors);
+      return;
+    }
     
     setIsSubmitting(true);
     try {
+      console.log('Calling onNext...');
       await onNext();
     } catch (error) {
       console.error('Submission error:', error);
@@ -74,6 +92,19 @@ const FinalContactStep = ({
 
   return (
     <div className="space-y-8">
+      {/* Back Button */}
+      {onBack && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="text-muted-foreground hover:text-foreground border border-border hover:border-primary transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Back
+        </Button>
+      )}
+
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
           Last step, {firstName || 'there'} (pinky promise).
@@ -198,6 +229,11 @@ const FinalContactStep = ({
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Debug info */}
+        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded">
+          Debug: Valid={validation.isValid ? 'true' : 'false'}, Errors: {JSON.stringify(validation.errors)}
+        </div>
       </div>
 
       <Button 

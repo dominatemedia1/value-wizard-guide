@@ -101,8 +101,7 @@ const ValuationGuide = () => {
         // Set body attribute for webhook success
         document.body.setAttribute("data-webhook-success", "true");
         console.log('🏷️ Set body attribute data-webhook-success to true for returning user');
-      }
-    } else {
+      } else {
       console.log('📭 No saved data found, starting fresh');
     }
   }, []);
@@ -440,6 +439,7 @@ const ValuationGuide = () => {
             onCompanyNameChange={(value) => updateValuationData('companyName', value)}
             onWebsiteChange={(value) => updateValuationData('website', value)}
             onNext={nextStep}
+            onBack={previousStep}
           />
         );
       default:
