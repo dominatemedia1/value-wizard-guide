@@ -102,7 +102,8 @@ const ValuationGuide = () => {
         document.body.setAttribute("data-webhook-success", "true");
         console.log('🏷️ Set body attribute data-webhook-success to true for returning user');
       } else {
-      console.log('📭 No saved data found, starting fresh');
+        console.log('📭 No saved data found, starting fresh');
+      }
     }
   }, []);
 
