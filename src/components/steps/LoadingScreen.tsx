@@ -69,7 +69,7 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
   };
 
   const estimatedValue = Math.round((valuationData.arrSliderValue * 
-    (valuationData.businessModel === 'b2b' ? 4 : 2) * 
+    (valuationData.isB2B ? 4 : 2) * 
     (1 + valuationData.qoqGrowthRate / 100)) / 1000000);
 
   return (
@@ -97,7 +97,7 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
             </div>
             <div>
               <span className="text-muted-foreground">Model:</span>
-              <span className="ml-2 font-medium">{valuationData.businessModel.toUpperCase()}</span>
+              <span className="ml-2 font-medium">{valuationData.isB2B ? 'B2B' : 'B2C'}</span>
             </div>
             <div>
               <span className="text-muted-foreground">CAC:</span>
