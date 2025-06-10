@@ -22,6 +22,7 @@ import ResultsDisplay from './steps/ResultsDisplay';
 import { calculateAccurateValuation, NewValuationData } from '../utils/newValuationCalculator';
 import { webflowControl, initWebflowListener } from '../utils/webflowIntegration';
 import { saveValuationData, loadValuationData, clearValuationData } from '../utils/cookieStorage';
+import { generateShareableUrl, generateLocalResultsUrl } from '../utils/urlSharing';
 
 export interface ValuationData {
   // New structure matching the 9 steps
@@ -201,6 +202,13 @@ const ValuationGuide = () => {
       // Calculate valuation using new formula
       const valuation = calculateAccurateValuation(newValuationData);
 
+      // Generate shareable URLs
+      const shareableUrl = generateShareableUrl(data);
+      const localResultsUrl = generateLocalResultsUrl(data);
+      
+      console.log('🔗 Generated shareable URL:', shareableUrl);
+      console.log('🔗 Generated local results URL:', localResultsUrl);
+
       // Get UTM parameters
       const urlParams = new URLSearchParams(window.location.search);
       
@@ -236,6 +244,10 @@ const ValuationGuide = () => {
         calculatedValuation: valuation,
         timestamp: new Date().toISOString(),
         source: 'valuation_guide_v2',
+        
+        // Add shareable URLs
+        shareableUrl: shareableUrl,
+        localResultsUrl: localResultsUrl,
         
         // Include UTM parameters
         utm_source: urlParams.get('utm_source') || '',
@@ -296,6 +308,21 @@ const ValuationGuide = () => {
 
   const nextStep = async () => {
     if (currentStep === 8) { // Final contact step
+      console.log('🚀 Form validation starting...');
+      console.log('📝 Current valuation data:', valuationData);
+      
+      // Basic validation
+      const requiredFields = ['firstName', 'lastName', 'email', 'companyName'];
+      const missingFields = requiredFields.filter(field => !valuationData[field as keyof ValuationData]);
+      
+      if (missingFields.length > 0) {
+        console.log('❌ Missing required fields:', missingFields);
+        alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+        return;
+      }
+      
+      console.log('✅ All required fields present, proceeding with submission');
+      
       // Mark as submitted and save to storage
       console.log('📝 Marking submission as complete');
       setIsSubmitted(true);
