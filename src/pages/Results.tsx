@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ResultsDisplay from '@/components/steps/ResultsDisplay';
 import { ValuationData } from '@/components/ValuationGuide';
+import { decodeUrlData } from '@/utils/urlSharing';
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -14,22 +15,27 @@ const Results = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🚀 Results page loading, checking for data...');
+    
     // Try to get data from URL parameters first
     const encodedData = searchParams.get('data');
+    console.log('📦 Raw encoded data from URL:', encodedData);
     
     if (encodedData) {
       try {
-        const decodedData = JSON.parse(atob(encodedData));
-        console.log('📦 Loaded data from URL parameters:', decodedData);
-        setValuationData(decodedData);
-        setLoading(false);
-        return;
+        const decodedData = decodeUrlData(encodedData);
+        if (decodedData) {
+          console.log('📦 Successfully loaded data from URL parameters:', decodedData);
+          setValuationData(decodedData);
+          setLoading(false);
+          return;
+        }
       } catch (error) {
         console.error('❌ Error decoding URL data:', error);
       }
     }
 
-    // Fallback to stored data if no URL params
+    // Fallback to stored data if no URL params or decoding failed
     try {
       const stored = localStorage.getItem('valuationData');
       if (stored) {
@@ -37,7 +43,11 @@ const Results = () => {
         if (parsedData.valuationData) {
           console.log('📦 Loaded data from localStorage:', parsedData.valuationData);
           setValuationData(parsedData.valuationData);
+        } else {
+          console.log('❌ No valuationData field in localStorage');
         }
+      } else {
+        console.log('❌ No data found in localStorage');
       }
     } catch (error) {
       console.error('❌ Error loading stored data:', error);
