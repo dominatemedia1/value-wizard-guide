@@ -13,36 +13,56 @@ const Results = () => {
   const [searchParams] = useSearchParams();
   const [valuationData, setValuationData] = useState<ValuationData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dataSource, setDataSource] = useState<string>('');
 
   useEffect(() => {
-    console.log('🚀 Results page loading, checking for data...');
+    console.log('🚀 Results page loading, starting data retrieval process...');
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔍 Search params:', Object.fromEntries(searchParams.entries()));
     
     // Try to get data from URL parameters first
     const encodedData = searchParams.get('data');
     console.log('📦 Raw encoded data from URL:', encodedData);
+    console.log('📦 Encoded data type:', typeof encodedData);
+    console.log('📦 Encoded data length:', encodedData?.length || 0);
     
     if (encodedData) {
+      console.log('🔄 Attempting to decode URL data...');
       try {
         const decodedData = decodeUrlData(encodedData);
+        console.log('🔄 Decode result:', decodedData);
+        
         if (decodedData) {
-          console.log('📦 Successfully loaded data from URL parameters:', decodedData);
+          console.log('✅ Successfully loaded data from URL parameters');
+          console.log('📦 Decoded data structure:', Object.keys(decodedData));
           setValuationData(decodedData);
+          setDataSource('URL parameters');
           setLoading(false);
           return;
+        } else {
+          console.log('❌ Decoding returned null or invalid data');
         }
       } catch (error) {
-        console.error('❌ Error decoding URL data:', error);
+        console.error('❌ Error during URL data decoding:', error);
       }
+    } else {
+      console.log('📭 No encoded data found in URL parameters');
     }
 
     // Fallback to stored data if no URL params or decoding failed
+    console.log('🔄 Falling back to localStorage...');
     try {
       const stored = localStorage.getItem('valuationData');
+      console.log('📦 Raw localStorage data:', stored?.substring(0, 100) + '...');
+      
       if (stored) {
         const parsedData = JSON.parse(stored);
+        console.log('📦 Parsed localStorage structure:', Object.keys(parsedData));
+        
         if (parsedData.valuationData) {
-          console.log('📦 Loaded data from localStorage:', parsedData.valuationData);
+          console.log('✅ Successfully loaded data from localStorage');
           setValuationData(parsedData.valuationData);
+          setDataSource('localStorage');
         } else {
           console.log('❌ No valuationData field in localStorage');
         }
@@ -53,6 +73,7 @@ const Results = () => {
       console.error('❌ Error loading stored data:', error);
     }
     
+    console.log('🏁 Data loading process complete');
     setLoading(false);
   }, [searchParams]);
 
@@ -84,7 +105,13 @@ const Results = () => {
                 <li>• The link has expired or is invalid</li>
                 <li>• You haven't completed the valuation yet</li>
                 <li>• Your browser data has been cleared</li>
+                <li>• The URL parameters are corrupted</li>
               </ul>
+              <div className="mt-4 p-3 bg-muted rounded text-xs text-left">
+                <strong>Debug Info:</strong><br/>
+                URL: {window.location.href}<br/>
+                Data source attempted: {dataSource || 'None'}
+              </div>
             </div>
             <Link to="/">
               <Button className="w-full">
@@ -101,6 +128,13 @@ const Results = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-4 pt-[45px] pb-8 max-w-6xl">
+        {/* Debug info in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-sm">
+            <strong>Debug:</strong> Data loaded from {dataSource}
+          </div>
+        )}
+        
         {/* Header with back button */}
         <div className="mb-8">
           <Link to="/">
