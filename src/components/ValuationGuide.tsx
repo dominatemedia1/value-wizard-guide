@@ -73,25 +73,36 @@ const ValuationGuide = () => {
   useEffect(() => {
     const savedData = loadValuationData();
     if (savedData) {
+      console.log('Loading saved data from cookies:', savedData);
       setValuationData(savedData.valuationData || valuationData);
       setCurrentStep(savedData.currentStep || 0);
       setIsSubmitted(savedData.isSubmitted || false);
+      
+      // If they already submitted, show results immediately (no webhook needed)
       if (savedData.isSubmitted) {
-        setShowResultsWaiting(true);
+        console.log('User already submitted, showing results without webhook');
+        setShowResults(true);
+        setShowResultsWaiting(false);
       }
     }
   }, []);
 
-  // Save data to cookies whenever valuationData or currentStep changes
+  // Save data to cookies whenever valuationData, currentStep, or submission status changes
   useEffect(() => {
-    if (currentStep >= 0 && !isSubmitted) {
-      saveValuationData({
+    if (currentStep >= 0) {
+      const dataToSave = {
         valuationData,
         currentStep,
-        isSubmitted
-      });
+        isSubmitted,
+        showResultsWaiting,
+        showResults,
+        submittedAt: isSubmitted ? new Date().toISOString() : undefined
+      };
+      
+      saveValuationData(dataToSave);
+      console.log('Saved data to cookies:', dataToSave);
     }
-  }, [valuationData, currentStep, isSubmitted]);
+  }, [valuationData, currentStep, isSubmitted, showResultsWaiting, showResults]);
 
   useEffect(() => {
     // Initialize Webflow listener
@@ -107,8 +118,8 @@ const ValuationGuide = () => {
       }
     };
 
-    // Check if we should show results based on stored start time
-    if (showResultsWaiting && !showResults) {
+    // Check if we should show results based on stored start time (only for new submissions)
+    if (showResultsWaiting && !showResults && !isSubmitted) {
       const startTime = localStorage.getItem('valuation_start_time');
       if (startTime) {
         const elapsed = Date.now() - parseInt(startTime);
@@ -146,7 +157,7 @@ const ValuationGuide = () => {
       if (timer) clearTimeout(timer);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentStep, showResultsWaiting, showResults]);
+  }, [currentStep, showResultsWaiting, showResults, isSubmitted]);
 
   const sendWebhook = async (data: ValuationData) => {
     try {
@@ -263,20 +274,15 @@ const ValuationGuide = () => {
 
   const nextStep = async () => {
     if (currentStep === 8) { // Final contact step
-      // Mark as submitted and clear cookies for form data (but keep submitted state)
+      // Mark as submitted and save to cookies
       setIsSubmitted(true);
-      saveValuationData({
-        valuationData,
-        currentStep,
-        isSubmitted: true
-      });
       
-      // Send webhook and show results waiting
+      // Send webhook ONLY if this is a new submission (not returning user)
       console.log('Attempting to send webhook...');
       const success = await sendWebhook(valuationData);
       console.log('Webhook success:', success);
       
-      // Always show results waiting regardless of webhook success
+      // Always show results waiting for new submissions
       setShowResultsWaiting(true);
       
       // Set start time for the 5 second timer
@@ -462,3 +468,5 @@ const ValuationGuide = () => {
 };
 
 export default ValuationGuide;
+
+}

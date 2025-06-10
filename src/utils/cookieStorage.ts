@@ -7,11 +7,13 @@ export interface SavedData {
   isSubmitted: boolean;
   showResultsWaiting?: boolean;
   showResults?: boolean;
+  submittedAt?: string; // timestamp when they submitted
 }
 
 export const saveValuationData = (data: SavedData) => {
   const cookieValue = JSON.stringify(data);
-  document.cookie = `valuationData=${cookieValue}; max-age=${60 * 60 * 24 * 7}; path=/;`; // Expires in 7 days
+  const days180 = 60 * 60 * 24 * 180; // 180 days in seconds
+  document.cookie = `valuationData=${cookieValue}; max-age=${days180}; path=/;`;
 };
 
 export const loadValuationData = (): SavedData | undefined => {
