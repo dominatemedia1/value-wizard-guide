@@ -167,7 +167,7 @@ const FinalContactStep = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number *</Label>
           <Input
             id="phone"
             type="tel"
@@ -204,7 +204,7 @@ const FinalContactStep = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="website">Website</Label>
+          <Label htmlFor="website">Website *</Label>
           <Input
             id="website"
             placeholder="Enter your website URL"
@@ -229,11 +229,6 @@ const FinalContactStep = ({
             </AlertDescription>
           </Alert>
         )}
-
-        {/* Debug info */}
-        <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded">
-          Debug: Valid={validation.isValid ? 'true' : 'false'}, Errors: {JSON.stringify(validation.errors)}
-        </div>
       </div>
 
       <Button 
