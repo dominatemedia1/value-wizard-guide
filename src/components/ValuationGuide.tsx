@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,7 +81,7 @@ const ValuationGuide = () => {
       
       // If they already submitted, show results immediately and post webhook success message
       if (savedData.isSubmitted) {
-        console.log('✅ User already submitted, showing results without webhook');
+        console.log('✅ User already submitted, showing results and posting webhook success');
         setShowResults(true);
         setShowResultsWaiting(false);
         
@@ -91,6 +90,17 @@ const ValuationGuide = () => {
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ action: "webhookSuccess" }, "*");
         }
+        
+        // Set the webhook success flag if revenue qualifies
+        if (savedData.valuationData.arrSliderValue >= 250000) {
+          console.log('💰 Returning user revenue qualifies! Setting webhookSuccessFlag to true');
+          (window as any).webhookSuccessFlag = true;
+          console.log('🏁 Flag set for returning user! Current value:', (window as any).webhookSuccessFlag);
+        }
+        
+        // Set body attribute for webhook success
+        document.body.setAttribute("data-webhook-success", "true");
+        console.log('🏷️ Set body attribute data-webhook-success to true for returning user');
       }
     } else {
       console.log('📭 No saved data found, starting fresh');
