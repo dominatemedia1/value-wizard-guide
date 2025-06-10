@@ -4,18 +4,28 @@ import { Clock, CheckCircle, Brain, TrendingUp, BarChart3 } from 'lucide-react';
 
 const ResultsWaiting = () => {
   const [timeElapsed, setTimeElapsed] = useState(0);
-  const [randomTargetTime] = useState(() => {
-    // Random time between 7-12 minutes (420-720 seconds)
-    return Math.floor(Math.random() * (720 - 420 + 1)) + 420;
+  const [targetTime] = useState(5); // Fixed 5 seconds
+  const [startTime] = useState(() => {
+    // Get or set start time in localStorage
+    const stored = localStorage.getItem('valuation_start_time');
+    if (stored) {
+      return parseInt(stored);
+    } else {
+      const now = Date.now();
+      localStorage.setItem('valuation_start_time', now.toString());
+      return now;
+    }
   });
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeElapsed(prev => prev + 1);
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      setTimeElapsed(elapsed);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [startTime]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -23,12 +33,7 @@ const ResultsWaiting = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatTargetTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    return `${mins} minutes`;
-  };
-
-  const progressPercentage = Math.min((timeElapsed / randomTargetTime) * 100, 100);
+  const progressPercentage = Math.min((timeElapsed / targetTime) * 100, 100);
 
   return (
     <div className="space-y-8 text-center">
@@ -63,7 +68,7 @@ const ResultsWaiting = () => {
         </div>
         
         <p className="text-sm text-muted-foreground mb-6">
-          Estimated completion: {formatTargetTime(randomTargetTime)}
+          Estimated completion: {targetTime} seconds
         </p>
         
         <div className="space-y-4 text-sm">

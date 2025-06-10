@@ -92,6 +92,33 @@ const ValuationGuide = () => {
       }
     };
 
+    // Check if we should show results based on stored start time
+    if (showResultsWaiting && !showResults) {
+      const startTime = localStorage.getItem('valuation_start_time');
+      if (startTime) {
+        const elapsed = Date.now() - parseInt(startTime);
+        const fiveSeconds = 5 * 1000; // 5 seconds in milliseconds
+        
+        if (elapsed >= fiveSeconds) {
+          // Time is up, show results immediately
+          console.log('Timer already elapsed, showing results immediately');
+          setShowResultsWaiting(false);
+          setShowResults(true);
+          localStorage.removeItem('valuation_start_time');
+        } else {
+          // Set timer for remaining time
+          const remainingTime = fiveSeconds - elapsed;
+          console.log(`Setting timer for remaining ${remainingTime}ms`);
+          timer = setTimeout(() => {
+            console.log('5 seconds elapsed, showing results');
+            setShowResultsWaiting(false);
+            setShowResults(true);
+            localStorage.removeItem('valuation_start_time');
+          }, remainingTime);
+        }
+      }
+    }
+
     if (currentStep >= 0 && currentStep < totalSteps - 1 && !showResultsWaiting && !showResults) {
       timer = setTimeout(() => {
         setShowExitPopup(true);
@@ -246,6 +273,7 @@ const ValuationGuide = () => {
     <title>Dominate Media - SaaS Valuation Report</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+        /* Base Styles */
         body {
             margin: 0;
             padding: 0;
@@ -254,9 +282,13 @@ const ValuationGuide = () => {
             line-height: 1.6;
             color: #061812;
         }
+
+        /* Brand Colors */
         .brand-primary { color: #024227; }
         .brand-accent { color: #3DFF90; }
         .brand-dark { color: #061812; }
+
+        /* Interactive Elements */
         .cta-button {
             background-color: #3DFF90;
             color: #024227 !important;
@@ -268,6 +300,13 @@ const ValuationGuide = () => {
             display: inline-block;
             box-shadow: 0 4px 6px rgba(0, 66, 39, 0.1);
         }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 66, 39, 0.15);
+        }
+
+        /* Apple-Style Cards */
         .card {
             background: #ffffff;
             border-radius: 18px;
@@ -276,30 +315,42 @@ const ValuationGuide = () => {
             box-shadow: 0 4px 24px rgba(0, 66, 39, 0.08);
             border: 1px solid rgba(0, 66, 39, 0.05);
         }
+
+        /* Progress Bars */
         .progress-bar {
             height: 8px;
             background: #e0e0e0;
             border-radius: 4px;
             overflow: hidden;
         }
+
         .progress-fill {
             height: 100%;
             background: #3DFF90;
         }
+
+        /* Chart Container */
         .chart-container {
             background: #f8f9fa;
             border-radius: 12px;
             padding: 1.5rem;
             margin: 2rem 0;
         }
+
+        /* Responsive Design */
         @media (max-width: 600px) {
-            .container { padding: 1rem; }
-            .card { padding: 1.5rem; }
+            .container {
+                padding: 1rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div style="max-width: 680px; margin: 0 auto; padding: 2rem;">
+        <!-- Main Content -->
         <div class="card">
             <h1 class="brand-primary" style="font-size: 28px; margin-bottom: 1.5rem;">Hey ${data.firstName},</h1>
             
@@ -334,10 +385,12 @@ const ValuationGuide = () => {
                 </div>
             </div>
 
+            <!-- CTA Section -->
             <div style="text-align: center; margin: 2.5rem 0;">
                 <a href="#" class="cta-button">STOP BEING INVISIBLE - CLAIM MY $${formatCurrencyForEmail(valuation.leftOnTable)}</a>
             </div>
 
+            <!-- Roadmap -->
             <div style="border-left: 3px solid #3DFF90; padding-left: 1.5rem; margin: 2rem 0;">
                 <h3 class="brand-dark" style="font-size: 20px;">Your Roadmap:</h3>
                 <ul style="list-style: none; padding-left: 0;">
@@ -348,6 +401,7 @@ const ValuationGuide = () => {
             </div>
         </div>
 
+        <!-- Footer -->
         <div style="text-align: center; color: #666; font-size: 14px; margin-top: 2rem;">
             <p>© 2025 Dominate Media. All rights reserved.</p>
         </div>
@@ -359,22 +413,20 @@ const ValuationGuide = () => {
       const urlParams = new URLSearchParams(window.location.search);
       
       const emailWebhookData = {
-        to: data.email,
-        subject: `${data.firstName}, your $${formatCurrencyForEmail(valuation.leftOnTable)} SaaS valuation report is ready`,
-        html: emailHtml,
         firstName: data.firstName,
         email: data.email,
         phone: data.phone,
         companyName: data.companyName,
         website: data.website,
-        currentValuation: valuation.current,
-        optimizedValuation: valuation.optimized,
-        leftOnTable: valuation.leftOnTable,
         revenue: data.revenue,
         cac: data.cac,
+        cacContext: data.cacContext,
+        networkEffects: data.networkEffects,
         growthRate: data.growthRate,
         businessModel: data.businessModel,
-        networkEffects: data.networkEffects,
+        calculatedValuation: valuation,
+        emailHtml: emailHtml,
+        emailSubject: `${data.firstName}, your $${formatCurrencyForEmail(valuation.leftOnTable)} SaaS valuation report is ready`,
         timestamp: new Date().toISOString(),
         source: 'valuation_guide_email',
         utm_source: urlParams.get('utm_source') || '',
@@ -384,7 +436,7 @@ const ValuationGuide = () => {
         utm_content: urlParams.get('utm_content') || ''
       };
 
-      console.log('Sending email webhook data:', emailWebhookData);
+      console.log('Sending email webhook data to same endpoint:', emailWebhookData);
 
       const response = await fetch('https://hook.us1.make.com/ibj7l0wt2kmub6olt7qu4qeluyi4q8mz', {
         method: 'POST',
@@ -438,13 +490,16 @@ const ValuationGuide = () => {
       // Always show results waiting regardless of webhook success
       setShowResultsWaiting(true);
       
-      // Set a random timer between 7-12 minutes, then show results
-      const randomMinutes = Math.floor(Math.random() * (12 - 7 + 1)) + 7;
+      // Set start time for the 5 second timer
+      localStorage.setItem('valuation_start_time', Date.now().toString());
+      
+      // Set timer for 5 seconds
       setTimeout(() => {
-        console.log(`Random ${randomMinutes} minutes elapsed, showing results`);
+        console.log('5 seconds elapsed, showing results');
         setShowResultsWaiting(false);
         setShowResults(true);
-      }, randomMinutes * 60 * 1000);
+        localStorage.removeItem('valuation_start_time');
+      }, 5000);
     } else if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     }

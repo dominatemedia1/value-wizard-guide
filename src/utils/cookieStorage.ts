@@ -1,46 +1,41 @@
+import { ValuationData } from '../components/ValuationGuide';
 
-export const COOKIE_NAME = 'valuation_guide_data';
-export const COOKIE_EXPIRY_DAYS = 7;
+export interface SavedData {
+  valuationData: ValuationData;
+  currentStep: number;
+  isSubmitted: boolean;
+  showResultsWaiting?: boolean;
+  showResults?: boolean;
+}
 
-export const setCookie = (name: string, value: string, days: number) => {
-  const expires = new Date();
-  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+export const saveValuationData = (data: SavedData) => {
+  const cookieValue = JSON.stringify(data);
+  document.cookie = `valuationData=${cookieValue}; max-age=${60 * 60 * 24 * 7}; path=/;`; // Expires in 7 days
 };
 
-export const getCookie = (name: string): string | null => {
-  const nameEQ = name + '=';
-  const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+export const loadValuationData = (): SavedData | undefined => {
+  const cookieName = 'valuationData=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookieArray = decodedCookie.split(';');
+
+  for (let i = 0; i < cookieArray.length; i++) {
+    let cookie = cookieArray[i];
+    while (cookie.charAt(0) === ' ') {
+      cookie = cookie.substring(1);
+    }
+    if (cookie.indexOf(cookieName) === 0) {
+      try {
+        return JSON.parse(cookie.substring(cookieName.length, cookie.length));
+      } catch (e) {
+        console.error("Error parsing cookie data:", e);
+        return undefined;
+      }
+    }
   }
-  return null;
-};
-
-export const deleteCookie = (name: string) => {
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-};
-
-export const saveValuationData = (data: any) => {
-  try {
-    setCookie(COOKIE_NAME, JSON.stringify(data), COOKIE_EXPIRY_DAYS);
-  } catch (error) {
-    console.error('Error saving data to cookie:', error);
-  }
-};
-
-export const loadValuationData = (): any | null => {
-  try {
-    const cookieData = getCookie(COOKIE_NAME);
-    return cookieData ? JSON.parse(cookieData) : null;
-  } catch (error) {
-    console.error('Error loading data from cookie:', error);
-    return null;
-  }
+  return undefined;
 };
 
 export const clearValuationData = () => {
-  deleteCookie(COOKIE_NAME);
+  document.cookie = 'valuationData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  localStorage.removeItem('valuation_start_time');
 };
