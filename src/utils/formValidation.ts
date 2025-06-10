@@ -10,13 +10,14 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePhone = (phone: string): boolean => {
+  if (!phone.trim()) return true; // Phone is optional
   const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
   const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
   return cleanPhone.length >= 10 && phoneRegex.test(cleanPhone);
 };
 
 export const validateWebsite = (website: string): boolean => {
-  if (!website.trim()) return false;
+  if (!website.trim()) return true; // Website is optional
   
   try {
     const url = website.startsWith('http') ? website : `https://${website}`;
@@ -51,10 +52,12 @@ export const validateContactForm = (data: {
     errors.companyName = 'Company name is required';
   }
 
+  // Only validate phone if it's provided
   if (data.phone && !validatePhone(data.phone)) {
     errors.phone = 'Please enter a valid phone number';
   }
 
+  // Only validate website if it's provided
   if (data.website && !validateWebsite(data.website)) {
     errors.website = 'Please enter a valid website URL';
   }
