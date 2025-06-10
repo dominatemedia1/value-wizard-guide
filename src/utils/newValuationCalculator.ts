@@ -1,4 +1,3 @@
-
 export interface NewValuationData {
   arrSliderValue: number;
   nrr: string;
@@ -12,8 +11,8 @@ export interface NewValuationData {
 }
 
 export function calculateAccurateValuation(data: NewValuationData) {
-  // Base multiple: 7.0x (SaaS Capital Index 2025 - CONFIRMED)
-  const baseMultiple = 7.0;
+  // Base multiple: 3.5x (Updated per request)
+  const baseMultiple = 3.5;
   
   // Convert ARR slider value to actual number
   let arr = data.arrSliderValue;

@@ -68,9 +68,9 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
     return `$${amount.toLocaleString()}`;
   };
 
-  const estimatedValue = Math.round((valuationData.revenue * 
-    (valuationData.businessModel === 'b2b' ? 8 : 4) * 
-    (1 + valuationData.growthRate / 100)) / 1000000);
+  const estimatedValue = Math.round((valuationData.arrSliderValue * 
+    (valuationData.businessModel === 'b2b' ? 4 : 2) * 
+    (1 + valuationData.qoqGrowthRate / 100)) / 1000000);
 
   return (
     <div className="space-y-8 text-center">
@@ -89,11 +89,11 @@ const LoadingScreen = ({ valuationData }: LoadingScreenProps) => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-muted-foreground">ARR:</span>
-              <span className="ml-2 font-medium">{formatRevenue(valuationData.revenue)}</span>
+              <span className="ml-2 font-medium">{formatRevenue(valuationData.arrSliderValue)}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Growth:</span>
-              <span className="ml-2 font-medium">{valuationData.growthRate}%</span>
+              <span className="ml-2 font-medium">{valuationData.qoqGrowthRate}%</span>
             </div>
             <div>
               <span className="text-muted-foreground">Model:</span>
