@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import ExitPopup from './ExitPopup';
@@ -142,7 +141,7 @@ const ValuationGuide = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-start justify-center pt-[45px] p-4">
       <Card className="w-full max-w-2xl mx-auto border-2 border-border bg-card/95 backdrop-blur-sm">
         <CardContent className="p-8">
           <StepProgress

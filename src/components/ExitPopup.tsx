@@ -11,7 +11,7 @@ interface ExitPopupProps {
 
 const ExitPopup = ({ onClose, onContinue }: ExitPopupProps) => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-[45px] p-4 z-50">
       <Card className="w-full max-w-md bg-card shadow-2xl animate-scale-in">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">

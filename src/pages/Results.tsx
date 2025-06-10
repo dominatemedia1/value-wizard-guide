@@ -48,7 +48,7 @@ const Results = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-start justify-center pt-[45px] p-4">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">Loading your valuation results...</p>
@@ -59,7 +59,7 @@ const Results = () => {
 
   if (!valuationData) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen flex items-start justify-center pt-[45px] p-4">
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center space-y-6">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
@@ -90,7 +90,7 @@ const Results = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 pt-[45px] pb-8 max-w-6xl">
         {/* Header with back button */}
         <div className="mb-8">
           <Link to="/">
