@@ -1,3 +1,4 @@
+
 import { ValuationData } from '../components/ValuationGuide';
 
 export interface SavedData {

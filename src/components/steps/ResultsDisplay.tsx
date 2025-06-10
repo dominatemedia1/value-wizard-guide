@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, DollarSign, Target, Zap, Award, ChevronRight } from 'lucide-react';
 import { ValuationData } from '../ValuationGuide';
-import { calculateValuation } from '../../utils/valuationCalculator';
+import { calculateAccurateValuation, NewValuationData } from '../../utils/newValuationCalculator';
 
 interface ResultsDisplayProps {
   valuationData: ValuationData;
@@ -13,26 +13,21 @@ interface ResultsDisplayProps {
 }
 
 const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => {
-  // Calculate valuation using the existing calculator
-  const getBrandScore = (networkEffects: string): number => {
-    const scoreMap: { [key: string]: number } = {
-      'invisible': 1,
-      'emerging': 2,
-      'established': 3,
-      'dominant': 4
-    };
-    return scoreMap[networkEffects] || 0;
+  // Prepare data for new calculation
+  const newValuationData: NewValuationData = {
+    arrSliderValue: valuationData.arrSliderValue,
+    nrr: valuationData.nrr,
+    revenueChurn: valuationData.revenueChurn,
+    qoqGrowthRate: valuationData.qoqGrowthRate,
+    cac: valuationData.cac,
+    cacContext: valuationData.cacContext,
+    profitability: valuationData.profitability,
+    marketGravity: valuationData.marketGravity,
+    isB2B: valuationData.businessModel === 'b2b'
   };
 
-  const brandScore = getBrandScore(valuationData.networkEffects);
-  const isB2B = valuationData.businessModel === 'b2b';
-  const valuation = calculateValuation(
-    valuationData.revenue,
-    valuationData.cac,
-    brandScore,
-    valuationData.growthRate,
-    isB2B
-  );
+  // Calculate valuation using the new calculator
+  const valuation = calculateAccurateValuation(newValuationData);
 
   // Helper functions for display
   const formatCurrency = (amount: number) => {
@@ -41,40 +36,30 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
     return `$${amount.toLocaleString()}`;
   };
 
-  const getScoreFromMultiplier = (multiplier: number, maxMultiplier: number): number => {
-    return Math.round((multiplier / maxMultiplier) * 5);
-  };
-
-  // Calculate individual scores (approximate based on multipliers)
-  const revenueScore = Math.min(5, Math.max(1, Math.round((valuationData.revenue / 1000000) * 2 + 2)));
-  const cacScore = Math.min(5, Math.max(1, Math.round(((valuationData.revenue * 0.33) / valuationData.cac) * 0.8 + 1)));
-  const brandScoreDisplay = brandScore + 1; // Convert 0-4 to 1-5
-  const growthScore = Math.min(5, Math.max(1, Math.round(valuationData.growthRate / 20 + 1)));
-
   const metrics = [
     {
-      label: 'Revenue Predictability',
-      score: revenueScore,
+      label: 'Net Revenue Retention',
+      score: valuation.emailVariables.revenue_score,
       icon: DollarSign,
-      description: 'Based on your ARR size and consistency'
+      description: 'Based on your NRR and customer expansion'
     },
     {
-      label: 'Customer Acquisition',
-      score: cacScore,
+      label: 'CAC Efficiency',
+      score: valuation.emailVariables.cac_score,
       icon: Target,
-      description: 'Efficiency of your CAC vs LTV ratio'
+      description: 'Customer acquisition cost effectiveness'
     },
     {
       label: 'Brand Authority',
-      score: brandScoreDisplay,
+      score: valuation.emailVariables.brand_score,
       icon: Award,
-      description: 'Market positioning and network effects'
+      description: 'Market gravity and positioning strength'
     },
     {
       label: 'Growth Trajectory',
-      score: growthScore,
+      score: valuation.emailVariables.growth_score,
       icon: TrendingUp,
-      description: 'Current growth rate and scalability'
+      description: 'Quarter-over-quarter growth momentum'
     }
   ];
 
@@ -166,52 +151,23 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
               <h3 className="font-semibold text-foreground mb-3">🎯 Priority Focus Area</h3>
               <p className="text-muted-foreground mb-4">
                 Your biggest opportunity for valuation improvement is <strong>{lowestMetric.label}</strong> 
-                (currently {lowestMetric.score}/5). Improving this could add significant value to your company.
+                (currently {lowestMetric.score}/5). This could unlock <strong>{formatCurrency(valuation.biggestOpportunity)}</strong> in additional value.
               </p>
               
               <div className="bg-primary/10 rounded-lg p-4">
                 <h4 className="font-medium text-primary mb-2">Recommended Actions:</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  {lowestMetric.label === 'Revenue Predictability' && (
-                    <>
-                      <li>• Implement annual contracts to increase predictability</li>
-                      <li>• Focus on reducing churn through better onboarding</li>
-                      <li>• Develop upselling strategies for existing customers</li>
-                    </>
-                  )}
-                  {lowestMetric.label === 'Customer Acquisition' && (
-                    <>
-                      <li>• Optimize your sales funnel to reduce CAC</li>
-                      <li>• Implement referral programs</li>
-                      <li>• Focus on higher-value customer segments</li>
-                    </>
-                  )}
-                  {lowestMetric.label === 'Brand Authority' && (
-                    <>
-                      <li>• Invest in content marketing and thought leadership</li>
-                      <li>• Build strategic partnerships</li>
-                      <li>• Strengthen your market positioning</li>
-                    </>
-                  )}
-                  {lowestMetric.label === 'Growth Trajectory' && (
-                    <>
-                      <li>• Expand to new market segments</li>
-                      <li>• Accelerate product development</li>
-                      <li>• Increase marketing and sales investment</li>
-                    </>
-                  )}
-                </ul>
+                <p className="text-sm text-muted-foreground">{valuation.improvementDescription}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white/50 rounded-lg p-6">
-                <h3 className="font-semibold text-foreground mb-3">📊 Industry Benchmark</h3>
+                <h3 className="font-semibold text-foreground mb-3">📊 vs Industry Benchmark</h3>
                 <p className="text-muted-foreground mb-2">
-                  Your company is valued at <strong>{((valuation.current / valuationData.revenue) * 1).toFixed(1)}x revenue</strong>
+                  Your company is valued at <strong>{((valuation.current / valuationData.arrSliderValue) * 1).toFixed(1)}x revenue</strong>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Industry average: {isB2B ? '6-8x' : '3-5x'} revenue multiple
+                  Performance vs median: <strong>{valuation.vsMedian >= 0 ? '+' : ''}{valuation.vsMedian}%</strong>
                 </p>
               </div>
               
@@ -232,21 +188,11 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
       {/* CTA Section */}
       <Card className="bg-gradient-to-r from-primary to-primary/80 text-white">
         <CardContent className="p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Want the Full Detailed Report?</h2>
+          <h2 className="text-2xl font-bold mb-4">Your Detailed Report Has Been Sent!</h2>
           <p className="text-lg opacity-90 mb-6">
-            Get a comprehensive PDF report with detailed analysis, benchmarks, and a step-by-step action plan 
-            to maximize your company's value.
+            A comprehensive analysis with your personalized action plan has been delivered to {valuationData.email}.
+            Check your inbox for the complete breakdown of how to unlock your ${formatCurrency(valuation.leftOnTable)} opportunity.
           </p>
-          
-          <Button 
-            onClick={onSendEmail}
-            variant="secondary"
-            size="lg"
-            className="bg-white text-primary hover:bg-gray-100"
-          >
-            Send Detailed Report to My Email
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
         </CardContent>
       </Card>
     </div>
