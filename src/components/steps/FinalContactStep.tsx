@@ -1,8 +1,12 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { validateContactForm, ValidationResult } from '@/utils/formValidation';
+import LoadingState from '@/components/LoadingState';
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface FinalContactStepProps {
   firstName: string;
@@ -25,7 +29,48 @@ const FinalContactStep = ({
   onFirstNameChange, onLastNameChange, onEmailChange, onPhoneChange, 
   onCompanyNameChange, onWebsiteChange, onNext 
 }: FinalContactStepProps) => {
-  const isValid = firstName && email && companyName;
+  const [validation, setValidation] = useState<ValidationResult>({ isValid: false, errors: {} });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Real-time validation
+  useEffect(() => {
+    const result = validateContactForm({
+      firstName, lastName, email, phone, companyName, website
+    });
+    setValidation(result);
+  }, [firstName, lastName, email, phone, companyName, website]);
+
+  const handleFieldBlur = (fieldName: string) => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
+  };
+
+  const handleSubmit = async () => {
+    if (!validation.isValid) return;
+    
+    setIsSubmitting(true);
+    try {
+      await onNext();
+    } catch (error) {
+      console.error('Submission error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getFieldError = (fieldName: string) => {
+    return touched[fieldName] && validation.errors[fieldName];
+  };
+
+  if (isSubmitting) {
+    return (
+      <LoadingState
+        type="loading"
+        title="Submitting Your Information"
+        description="We're processing your details and preparing your personalized valuation report. This will just take a moment..."
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -47,9 +92,17 @@ const FinalContactStep = ({
               placeholder="Enter your first name"
               value={firstName}
               onChange={(e) => onFirstNameChange(e.target.value)}
-              className="border border-border hover:border-primary focus:border-primary"
+              onBlur={() => handleFieldBlur('firstName')}
+              className={`border ${getFieldError('firstName') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
             />
+            {getFieldError('firstName') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {getFieldError('firstName')}
+              </p>
+            )}
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="lastName">Last Name</Label>
             <Input
@@ -57,6 +110,7 @@ const FinalContactStep = ({
               placeholder="Enter your last name"
               value={lastName}
               onChange={(e) => onLastNameChange(e.target.value)}
+              onBlur={() => handleFieldBlur('lastName')}
               className="border border-border hover:border-primary focus:border-primary"
             />
           </div>
@@ -70,8 +124,15 @@ const FinalContactStep = ({
             placeholder="Enter your email address"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            className="border border-border hover:border-primary focus:border-primary"
+            onBlur={() => handleFieldBlur('email')}
+            className={`border ${getFieldError('email') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
           />
+          {getFieldError('email') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              {getFieldError('email')}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -82,8 +143,15 @@ const FinalContactStep = ({
             placeholder="Enter your phone number"
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}
-            className="border border-border hover:border-primary focus:border-primary"
+            onBlur={() => handleFieldBlur('phone')}
+            className={`border ${getFieldError('phone') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
           />
+          {getFieldError('phone') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              {getFieldError('phone')}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -93,8 +161,15 @@ const FinalContactStep = ({
             placeholder="Enter your company name"
             value={companyName}
             onChange={(e) => onCompanyNameChange(e.target.value)}
-            className="border border-border hover:border-primary focus:border-primary"
+            onBlur={() => handleFieldBlur('companyName')}
+            className={`border ${getFieldError('companyName') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
           />
+          {getFieldError('companyName') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              {getFieldError('companyName')}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -104,17 +179,40 @@ const FinalContactStep = ({
             placeholder="Enter your website URL"
             value={website}
             onChange={(e) => onWebsiteChange(e.target.value)}
-            className="border border-border hover:border-primary focus:border-primary"
+            onBlur={() => handleFieldBlur('website')}
+            className={`border ${getFieldError('website') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
           />
+          {getFieldError('website') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              {getFieldError('website')}
+            </p>
+          )}
         </div>
+
+        {!validation.isValid && Object.keys(touched).length > 0 && (
+          <Alert className="border-red-200 bg-red-50">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-700">
+              Please fix the errors above before submitting.
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
       <Button 
-        onClick={onNext}
-        disabled={!isValid}
-        className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-lg font-semibold"
+        onClick={handleSubmit}
+        disabled={!validation.isValid || isSubmitting}
+        className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Get My Valuation Report →
+        {isSubmitting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          'Get My Valuation Report →'
+        )}
       </Button>
     </div>
   );

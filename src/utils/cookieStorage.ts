@@ -7,50 +7,93 @@ export interface SavedData {
   isSubmitted: boolean;
   showResultsWaiting?: boolean;
   showResults?: boolean;
-  submittedAt?: string; // timestamp when they submitted
+  submittedAt?: string;
+  version?: string; // Add versioning for future migrations
 }
 
 const COOKIE_NAME = 'valuationData';
-const MAX_COOKIE_SIZE = 4000; // 4KB limit minus some buffer
+const STORAGE_VERSION = '1.0';
+const MAX_COOKIE_SIZE = 3800; // Conservative size limit
+const EXPIRY_DAYS = 180;
 
-// Helper function to compress data by removing unnecessary fields
+// Enhanced compression with validation
 const compressData = (data: SavedData): any => {
-  const compressed = {
-    vd: data.valuationData,
-    cs: data.currentStep,
-    is: data.isSubmitted,
-    srw: data.showResultsWaiting,
-    sr: data.showResults,
-    sa: data.submittedAt
-  };
-  
-  // Remove empty/default values to save space
-  Object.keys(compressed).forEach(key => {
-    if (compressed[key] === undefined || compressed[key] === false || compressed[key] === '') {
-      delete compressed[key];
-    }
-  });
-  
-  return compressed;
-};
-
-// Helper function to decompress data
-const decompressData = (compressed: any): SavedData => {
-  return {
-    valuationData: compressed.vd || {},
-    currentStep: compressed.cs || 0,
-    isSubmitted: compressed.is || false,
-    showResultsWaiting: compressed.srw || false,
-    showResults: compressed.sr || false,
-    submittedAt: compressed.sa
-  };
-};
-
-// Fallback to localStorage if cookies fail
-const saveToLocalStorage = (data: SavedData) => {
   try {
-    localStorage.setItem(COOKIE_NAME, JSON.stringify(data));
-    console.log('✅ Data saved to localStorage as fallback');
+    const compressed = {
+      v: STORAGE_VERSION, // version
+      vd: data.valuationData,
+      cs: data.currentStep,
+      is: data.isSubmitted,
+      srw: data.showResultsWaiting,
+      sr: data.showResults,
+      sa: data.submittedAt,
+      ts: Date.now() // timestamp for debugging
+    };
+    
+    // Remove falsy values to save space
+    Object.keys(compressed).forEach(key => {
+      const value = compressed[key];
+      if (value === undefined || value === false || value === '' || value === 0) {
+        delete compressed[key];
+      }
+    });
+    
+    return compressed;
+  } catch (error) {
+    console.error('❌ Error compressing data:', error);
+    throw new Error('Failed to compress data');
+  }
+};
+
+// Enhanced decompression with validation
+const decompressData = (compressed: any): SavedData => {
+  try {
+    // Validate data structure
+    if (!compressed || typeof compressed !== 'object') {
+      throw new Error('Invalid compressed data format');
+    }
+
+    const decompressed: SavedData = {
+      valuationData: compressed.vd || {},
+      currentStep: Math.max(0, compressed.cs || 0),
+      isSubmitted: Boolean(compressed.is),
+      showResultsWaiting: Boolean(compressed.srw),
+      showResults: Boolean(compressed.sr),
+      submittedAt: compressed.sa,
+      version: compressed.v || '1.0'
+    };
+
+    // Validate step bounds
+    if (decompressed.currentStep > 8) {
+      decompressed.currentStep = 0;
+    }
+
+    return decompressed;
+  } catch (error) {
+    console.error('❌ Error decompressing data:', error);
+    throw new Error('Failed to decompress data');
+  }
+};
+
+// Enhanced localStorage operations with error handling
+const saveToLocalStorage = (data: SavedData): boolean => {
+  try {
+    const serialized = JSON.stringify(data);
+    
+    // Check localStorage quota
+    const testKey = '_test_quota';
+    try {
+      localStorage.setItem(testKey, serialized);
+      localStorage.removeItem(testKey);
+    } catch (quotaError) {
+      console.warn('⚠️ localStorage quota exceeded, clearing old data');
+      // Clear old valuation data and try again
+      localStorage.removeItem(COOKIE_NAME);
+      localStorage.setItem(COOKIE_NAME, serialized);
+    }
+    
+    localStorage.setItem(COOKIE_NAME, serialized);
+    console.log('✅ Data saved to localStorage successfully');
     return true;
   } catch (error) {
     console.error('❌ Failed to save to localStorage:', error);
@@ -61,123 +104,176 @@ const saveToLocalStorage = (data: SavedData) => {
 const loadFromLocalStorage = (): SavedData | undefined => {
   try {
     const data = localStorage.getItem(COOKIE_NAME);
-    if (data) {
-      console.log('📦 Loading data from localStorage fallback');
-      return JSON.parse(data);
+    if (!data) return undefined;
+    
+    const parsed = JSON.parse(data);
+    
+    // Validate data before returning
+    if (!parsed || typeof parsed !== 'object') {
+      console.warn('⚠️ Invalid localStorage data format, clearing');
+      localStorage.removeItem(COOKIE_NAME);
+      return undefined;
     }
+    
+    console.log('📦 Successfully loaded data from localStorage');
+    return parsed;
   } catch (error) {
     console.error('❌ Failed to load from localStorage:', error);
+    // Clear corrupted data
+    localStorage.removeItem(COOKIE_NAME);
+    return undefined;
   }
-  return undefined;
 };
 
-export const saveValuationData = (data: SavedData) => {
-  console.log('💾 Attempting to save valuation data:', data);
+// Enhanced cookie operations with better error handling
+export const saveValuationData = (data: SavedData): boolean => {
+  console.log('💾 Starting save operation for valuation data');
   
   try {
-    // First try to compress the data
-    const compressedData = compressData(data);
+    // Add timestamp and version info
+    const dataWithMeta = {
+      ...data,
+      version: STORAGE_VERSION,
+      lastSaved: new Date().toISOString()
+    };
+    
+    // Compress data
+    const compressedData = compressData(dataWithMeta);
     const jsonString = JSON.stringify(compressedData);
-    console.log('📊 Data size before encoding:', jsonString.length, 'bytes');
     
-    // Check size before encoding
-    if (jsonString.length > MAX_COOKIE_SIZE) {
-      console.warn('⚠️ Data too large for cookies, using localStorage fallback');
-      return saveToLocalStorage(data);
-    }
+    console.log(`📊 Compressed data size: ${jsonString.length} bytes`);
     
-    // Encode the data properly
-    const encodedValue = encodeURIComponent(jsonString);
-    console.log('📊 Encoded data size:', encodedValue.length, 'bytes');
-    
-    // Final size check after encoding
-    if (encodedValue.length > MAX_COOKIE_SIZE) {
-      console.warn('⚠️ Encoded data too large for cookies, using localStorage fallback');
-      return saveToLocalStorage(data);
-    }
-    
-    // Set the cookie with proper encoding
-    const days180 = 60 * 60 * 24 * 180; // 180 days in seconds
-    const cookieString = `${COOKIE_NAME}=${encodedValue}; max-age=${days180}; path=/; SameSite=Lax`;
-    document.cookie = cookieString;
-    
-    console.log('🍪 Cookie set with string:', cookieString.substring(0, 100) + '...');
-    
-    // Immediately verify the cookie was saved
-    const verification = loadValuationData();
-    if (verification) {
-      console.log('✅ Cookie verification successful - data saved and can be read back');
-      return true;
+    // Try cookies first if data is small enough
+    if (jsonString.length <= MAX_COOKIE_SIZE) {
+      try {
+        const encodedValue = encodeURIComponent(jsonString);
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + EXPIRY_DAYS);
+        
+        const cookieString = `${COOKIE_NAME}=${encodedValue}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax; Secure`;
+        document.cookie = cookieString;
+        
+        // Verify cookie was set
+        if (document.cookie.includes(`${COOKIE_NAME}=`)) {
+          console.log('✅ Data saved to cookies successfully');
+          // Also save to localStorage as backup
+          saveToLocalStorage(dataWithMeta);
+          return true;
+        } else {
+          throw new Error('Cookie verification failed');
+        }
+      } catch (cookieError) {
+        console.warn('⚠️ Cookie save failed, using localStorage:', cookieError);
+        return saveToLocalStorage(dataWithMeta);
+      }
     } else {
-      console.warn('⚠️ Cookie verification failed, trying localStorage fallback');
-      return saveToLocalStorage(data);
+      console.log('📏 Data too large for cookies, using localStorage');
+      return saveToLocalStorage(dataWithMeta);
     }
-    
   } catch (error) {
-    console.error('❌ Error saving to cookies:', error);
-    console.log('🔄 Falling back to localStorage');
-    return saveToLocalStorage(data);
+    console.error('❌ Critical error in saveValuationData:', error);
+    return false;
   }
 };
 
 export const loadValuationData = (): SavedData | undefined => {
-  console.log('📖 Attempting to load valuation data...');
+  console.log('📖 Starting load operation for valuation data');
   
   try {
-    // First try to load from cookies
-    const cookieName = `${COOKIE_NAME}=`;
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookieArray = decodedCookie.split(';');
+    // Try cookies first
+    const cookies = document.cookie.split(';');
+    const valuationCookie = cookies.find(cookie => 
+      cookie.trim().startsWith(`${COOKIE_NAME}=`)
+    );
     
-    console.log('🍪 Available cookies:', document.cookie ? 'found cookies' : 'no cookies found');
-    
-    for (let i = 0; i < cookieArray.length; i++) {
-      let cookie = cookieArray[i].trim();
-      if (cookie.indexOf(cookieName) === 0) {
-        try {
-          const cookieValue = cookie.substring(cookieName.length);
-          console.log('🔍 Found cookie value (first 50 chars):', cookieValue.substring(0, 50));
-          
-          // Try to decode and parse
-          const decodedValue = decodeURIComponent(cookieValue);
-          const parsedData = JSON.parse(decodedValue);
-          
-          // Check if it's compressed format
-          if (parsedData.vd) {
-            const decompressed = decompressData(parsedData);
-            console.log('✅ Successfully loaded compressed data from cookies');
-            return decompressed;
-          } else {
-            // Legacy format
-            console.log('✅ Successfully loaded legacy data from cookies');
-            return parsedData;
-          }
-        } catch (parseError) {
-          console.error('❌ Error parsing cookie data:', parseError);
-          break;
+    if (valuationCookie) {
+      try {
+        const cookieValue = valuationCookie.split('=').slice(1).join('=').trim();
+        const decodedValue = decodeURIComponent(cookieValue);
+        const parsedData = JSON.parse(decodedValue);
+        
+        let result: SavedData;
+        if (parsedData.vd || parsedData.v) {
+          // Compressed format
+          result = decompressData(parsedData);
+        } else {
+          // Legacy format
+          result = parsedData;
         }
+        
+        console.log('✅ Successfully loaded data from cookies');
+        return result;
+      } catch (cookieError) {
+        console.warn('⚠️ Cookie parsing failed, trying localStorage:', cookieError);
       }
     }
     
-    // If cookies failed, try localStorage
-    console.log('🔄 Cookie loading failed, trying localStorage...');
-    return loadFromLocalStorage();
+    // Fallback to localStorage
+    const localData = loadFromLocalStorage();
+    if (localData) {
+      return localData;
+    }
+    
+    console.log('📭 No saved data found in any storage');
+    return undefined;
     
   } catch (error) {
-    console.error('❌ Error loading valuation data:', error);
-    return loadFromLocalStorage();
+    console.error('❌ Critical error in loadValuationData:', error);
+    return undefined;
   }
 };
 
-export const clearValuationData = () => {
-  console.log('🗑️ Clearing valuation data from all storage');
+export const clearValuationData = (): void => {
+  console.log('🗑️ Clearing all valuation data');
   
-  // Clear cookie
-  document.cookie = `${COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  try {
+    // Clear cookies
+    document.cookie = `${COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
+    
+    // Clear localStorage
+    localStorage.removeItem(COOKIE_NAME);
+    localStorage.removeItem('valuation_start_time');
+    
+    // Clear any other related storage
+    const keysToRemove = Object.keys(localStorage).filter(key => 
+      key.startsWith('valuation_') || key.startsWith('webhook_')
+    );
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    console.log('✅ All valuation data cleared successfully');
+  } catch (error) {
+    console.error('❌ Error clearing valuation data:', error);
+  }
+};
+
+// Utility function to check storage health
+export const checkStorageHealth = (): { cookies: boolean; localStorage: boolean } => {
+  const testData = { test: 'data', timestamp: Date.now() };
   
-  // Clear localStorage
-  localStorage.removeItem(COOKIE_NAME);
-  localStorage.removeItem('valuation_start_time');
+  let cookiesWorking = false;
+  let localStorageWorking = false;
   
-  console.log('✅ All valuation data cleared');
+  try {
+    // Test cookies
+    const testCookie = `test_cookie=${JSON.stringify(testData)}; path=/`;
+    document.cookie = testCookie;
+    cookiesWorking = document.cookie.includes('test_cookie=');
+    if (cookiesWorking) {
+      document.cookie = 'test_cookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    }
+  } catch (error) {
+    console.warn('Cookie test failed:', error);
+  }
+  
+  try {
+    // Test localStorage
+    localStorage.setItem('test_storage', JSON.stringify(testData));
+    const retrieved = localStorage.getItem('test_storage');
+    localStorageWorking = !!retrieved;
+    localStorage.removeItem('test_storage');
+  } catch (error) {
+    console.warn('localStorage test failed:', error);
+  }
+  
+  return { cookies: cookiesWorking, localStorage: localStorageWorking };
 };
