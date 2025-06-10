@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,11 +79,17 @@ const ValuationGuide = () => {
       setCurrentStep(savedData.currentStep || 0);
       setIsSubmitted(savedData.isSubmitted || false);
       
-      // If they already submitted, show results immediately (no webhook needed)
+      // If they already submitted, show results immediately and post webhook success message
       if (savedData.isSubmitted) {
         console.log('User already submitted, showing results without webhook');
         setShowResults(true);
         setShowResultsWaiting(false);
+        
+        // Post webhook success message for returning users who completed the process
+        console.log('Posting webhook success message for returning user');
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ action: "webhookSuccess" }, "*");
+        }
       }
     }
   }, []);
@@ -277,7 +284,7 @@ const ValuationGuide = () => {
       // Mark as submitted and save to cookies
       setIsSubmitted(true);
       
-      // Send webhook ONLY if this is a new submission (not returning user)
+      // Send webhook for new submissions (not returning users)
       console.log('Attempting to send webhook...');
       const success = await sendWebhook(valuationData);
       console.log('Webhook success:', success);
@@ -468,5 +475,3 @@ const ValuationGuide = () => {
 };
 
 export default ValuationGuide;
-
-}
