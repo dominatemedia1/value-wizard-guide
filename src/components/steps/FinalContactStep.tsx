@@ -39,61 +39,26 @@ const FinalContactStep = ({
     phone: false
   });
 
-  // Auto-populate from URL parameters and hide if populated
+  // Check if fields should be hidden based on existing values
   useEffect(() => {
-    console.log('🔍 Checking URL parameters for auto-population...');
-    console.log('🌐 Current URL:', window.location.href);
-    console.log('🔗 Search params:', window.location.search);
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const utmFirstName = urlParams.get('first_name');
-    const utmEmail = urlParams.get('email');
-    const utmPhone = urlParams.get('phone');
-
-    console.log('📋 UTM Parameters found:');
-    console.log('  - first_name:', utmFirstName);
-    console.log('  - email:', utmEmail);
-    console.log('  - phone:', utmPhone);
-
-    // Check current field values
+    console.log('🔍 FinalContactStep: Checking field visibility...');
     console.log('📋 Current field values:');
     console.log('  - firstName:', firstName);
     console.log('  - email:', email);
     console.log('  - phone:', phone);
 
-    if (utmFirstName && utmFirstName.trim() !== '' && !firstName) {
-      console.log('✅ Setting firstName from UTM:', utmFirstName);
-      onFirstNameChange(utmFirstName);
-      setHiddenFields(prev => ({ ...prev, firstName: true }));
-    } else if (firstName) {
-      console.log('🔒 firstName already has value, hiding field');
-      setHiddenFields(prev => ({ ...prev, firstName: true }));
-    }
-
-    if (utmEmail && utmEmail.trim() !== '' && !email) {
-      console.log('✅ Setting email from UTM:', utmEmail);
-      onEmailChange(utmEmail);
-      setHiddenFields(prev => ({ ...prev, email: true }));
-    } else if (email) {
-      console.log('🔒 email already has value, hiding field');
-      setHiddenFields(prev => ({ ...prev, email: true }));
-    }
-
-    if (utmPhone && utmPhone.trim() !== '' && !phone) {
-      console.log('✅ Setting phone from UTM:', utmPhone);
-      onPhoneChange(utmPhone);
-      setHiddenFields(prev => ({ ...prev, phone: true }));
-    } else if (phone) {
-      console.log('🔒 phone already has value, hiding field');
-      setHiddenFields(prev => ({ ...prev, phone: true }));
-    }
-
-    console.log('👁️ Final hiddenFields state:', {
-      firstName: utmFirstName || firstName,
-      email: utmEmail || email,
-      phone: utmPhone || phone
+    setHiddenFields({
+      firstName: firstName && firstName.trim() !== '',
+      email: email && email.trim() !== '',
+      phone: phone && phone.trim() !== ''
     });
-  }, [firstName, email, phone, onFirstNameChange, onEmailChange, onPhoneChange]);
+
+    console.log('👁️ Field visibility:', {
+      firstName: firstName && firstName.trim() !== '',
+      email: email && email.trim() !== '',
+      phone: phone && phone.trim() !== ''
+    });
+  }, [firstName, email, phone]);
 
   // Real-time validation
   useEffect(() => {
