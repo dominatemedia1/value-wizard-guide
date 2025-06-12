@@ -33,6 +33,32 @@ const FinalContactStep = ({
   const [validation, setValidation] = useState<ValidationResult>({ isValid: false, errors: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [hiddenFields, setHiddenFields] = useState({
+    firstName: false,
+    email: false,
+    phone: false
+  });
+
+  // Auto-populate from URL parameters and hide if populated
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmFirstName = urlParams.get('first_name');
+    const utmEmail = urlParams.get('email');
+    const utmPhone = urlParams.get('phone');
+
+    if (utmFirstName && utmFirstName.trim() !== '') {
+      onFirstNameChange(utmFirstName);
+      setHiddenFields(prev => ({ ...prev, firstName: true }));
+    }
+    if (utmEmail && utmEmail.trim() !== '') {
+      onEmailChange(utmEmail);
+      setHiddenFields(prev => ({ ...prev, email: true }));
+    }
+    if (utmPhone && utmPhone.trim() !== '') {
+      onPhoneChange(utmPhone);
+      setHiddenFields(prev => ({ ...prev, phone: true }));
+    }
+  }, [onFirstNameChange, onEmailChange, onPhoneChange]);
 
   // Real-time validation
   useEffect(() => {
@@ -115,7 +141,7 @@ const FinalContactStep = ({
       </div>
 
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {!hiddenFields.firstName && (
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name *</Label>
             <Input
@@ -133,57 +159,49 @@ const FinalContactStep = ({
               </p>
             )}
           </div>
-          
+        )}
+
+        {!hiddenFields.email && (
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="email">Email Address *</Label>
             <Input
-              id="lastName"
-              placeholder="Enter your last name"
-              value={lastName}
-              onChange={(e) => onLastNameChange(e.target.value)}
-              onBlur={() => handleFieldBlur('lastName')}
-              className="border border-border hover:border-primary focus:border-primary"
+              id="email"
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => onEmailChange(e.target.value)}
+              onBlur={() => handleFieldBlur('email')}
+              className={`border ${getFieldError('email') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
             />
+            {getFieldError('email') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {getFieldError('email')}
+              </p>
+            )}
           </div>
-        </div>
+        )}
 
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address *</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email address"
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            onBlur={() => handleFieldBlur('email')}
-            className={`border ${getFieldError('email') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
-          />
-          {getFieldError('email') && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {getFieldError('email')}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number *</Label>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="Enter your phone number"
-            value={phone}
-            onChange={(e) => onPhoneChange(e.target.value)}
-            onBlur={() => handleFieldBlur('phone')}
-            className={`border ${getFieldError('phone') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
-          />
-          {getFieldError('phone') && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {getFieldError('phone')}
-            </p>
-          )}
-        </div>
+        {!hiddenFields.phone && (
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number *</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="Enter your phone number"
+              value={phone}
+              onChange={(e) => onPhoneChange(e.target.value)}
+              onBlur={() => handleFieldBlur('phone')}
+              className={`border ${getFieldError('phone') ? 'border-red-500' : 'border-border'} hover:border-primary focus:border-primary`}
+            />
+            {getFieldError('phone') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {getFieldError('phone')}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="companyName">Company Name *</Label>

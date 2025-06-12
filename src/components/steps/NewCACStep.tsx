@@ -31,7 +31,8 @@ const NewCACStep = ({ cac, context, onCACChange, onContextChange, onNext }: NewC
 
       <div className="space-y-6">
         <div className="space-y-4">
-          <div className="flex space-x-4">
+          {/* Mobile: Stack fields vertically, Desktop: Side by side */}
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
             <div className="flex-1">
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-lg">$</span>
@@ -40,11 +41,11 @@ const NewCACStep = ({ cac, context, onCACChange, onContextChange, onNext }: NewC
                   placeholder="Enter your CAC"
                   value={cac || ''}
                   onChange={handleCACChange}
-                  className="text-lg py-3 pl-8"
+                  className="text-lg py-3 pl-8 h-12"
                 />
               </div>
             </div>
-            <div className="w-48">
+            <div className="w-full md:w-48">
               <Select value={context} onValueChange={onContextChange}>
                 <SelectTrigger className="h-12">
                   <SelectValue />

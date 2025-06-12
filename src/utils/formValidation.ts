@@ -42,6 +42,8 @@ export const validateContactForm = (data: {
     errors.firstName = 'First name is required';
   }
 
+  // lastName is now optional - no validation needed
+
   if (!data.email.trim()) {
     errors.email = 'Email is required';
   } else if (!validateEmail(data.email)) {
