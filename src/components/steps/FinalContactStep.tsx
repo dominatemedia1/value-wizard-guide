@@ -41,24 +41,59 @@ const FinalContactStep = ({
 
   // Auto-populate from URL parameters and hide if populated
   useEffect(() => {
+    console.log('🔍 Checking URL parameters for auto-population...');
+    console.log('🌐 Current URL:', window.location.href);
+    console.log('🔗 Search params:', window.location.search);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const utmFirstName = urlParams.get('first_name');
     const utmEmail = urlParams.get('email');
     const utmPhone = urlParams.get('phone');
 
-    if (utmFirstName && utmFirstName.trim() !== '') {
+    console.log('📋 UTM Parameters found:');
+    console.log('  - first_name:', utmFirstName);
+    console.log('  - email:', utmEmail);
+    console.log('  - phone:', utmPhone);
+
+    // Check current field values
+    console.log('📋 Current field values:');
+    console.log('  - firstName:', firstName);
+    console.log('  - email:', email);
+    console.log('  - phone:', phone);
+
+    if (utmFirstName && utmFirstName.trim() !== '' && !firstName) {
+      console.log('✅ Setting firstName from UTM:', utmFirstName);
       onFirstNameChange(utmFirstName);
       setHiddenFields(prev => ({ ...prev, firstName: true }));
+    } else if (firstName) {
+      console.log('🔒 firstName already has value, hiding field');
+      setHiddenFields(prev => ({ ...prev, firstName: true }));
     }
-    if (utmEmail && utmEmail.trim() !== '') {
+
+    if (utmEmail && utmEmail.trim() !== '' && !email) {
+      console.log('✅ Setting email from UTM:', utmEmail);
       onEmailChange(utmEmail);
       setHiddenFields(prev => ({ ...prev, email: true }));
+    } else if (email) {
+      console.log('🔒 email already has value, hiding field');
+      setHiddenFields(prev => ({ ...prev, email: true }));
     }
-    if (utmPhone && utmPhone.trim() !== '') {
+
+    if (utmPhone && utmPhone.trim() !== '' && !phone) {
+      console.log('✅ Setting phone from UTM:', utmPhone);
       onPhoneChange(utmPhone);
       setHiddenFields(prev => ({ ...prev, phone: true }));
+    } else if (phone) {
+      console.log('🔒 phone already has value, hiding field');
+      setHiddenFields(prev => ({ ...prev, phone: true }));
     }
-  }, [onFirstNameChange, onEmailChange, onPhoneChange]);
+
+    console.log('👁️ Final hiddenFields state:', {
+      firstName: utmFirstName || firstName,
+      email: utmEmail || email,
+      phone: utmPhone || phone
+    });
+  }, [firstName, email, phone, onFirstNameChange, onEmailChange, onPhoneChange]);
 
   // Real-time validation
   useEffect(() => {
@@ -66,7 +101,7 @@ const FinalContactStep = ({
       firstName, lastName, email, phone, companyName, website
     });
     setValidation(result);
-    console.log('Validation result:', result);
+    console.log('📝 Form validation result:', result);
   }, [firstName, lastName, email, phone, companyName, website]);
 
   const handleFieldBlur = (fieldName: string) => {
@@ -74,7 +109,7 @@ const FinalContactStep = ({
   };
 
   const handleSubmit = async () => {
-    console.log('Submit clicked, validation:', validation);
+    console.log('🚀 Submit clicked, validation:', validation);
     
     // Mark all fields as touched to show validation errors
     setTouched({
@@ -87,16 +122,16 @@ const FinalContactStep = ({
     });
 
     if (!validation.isValid) {
-      console.log('Form validation failed:', validation.errors);
+      console.log('❌ Form validation failed:', validation.errors);
       return;
     }
     
     setIsSubmitting(true);
     try {
-      console.log('Calling onNext...');
+      console.log('📞 Calling onNext...');
       await onNext();
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('💥 Submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +168,7 @@ const FinalContactStep = ({
 
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
-          Last step, {firstName || 'there'} (pinky promise).
+          Last step{firstName ? `, ${firstName}` : ''} (pinky promise).
         </h2>
         <p className="text-muted-foreground">
           Simply enter your details below and we'll send you that valuation report faster than you can say "unicorn status."

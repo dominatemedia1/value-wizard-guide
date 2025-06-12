@@ -55,6 +55,15 @@ export const generateShareableUrl = (valuationData: ValuationData, baseUrl: stri
     console.log('🔗 Final shareable URL:', finalUrl);
     console.log('🔗 URL length:', finalUrl.length);
     
+    // Test the URL by trying to decode it immediately
+    console.log('🧪 Testing URL by decoding...');
+    const testDecode = decodeUrlData(urlSafeData);
+    if (testDecode) {
+      console.log('✅ URL test successful - data can be decoded');
+    } else {
+      console.log('❌ URL test failed - data cannot be decoded');
+    }
+    
     return finalUrl;
     
   } catch (error) {
@@ -99,6 +108,11 @@ export const generateLocalResultsUrl = (valuationData: ValuationData): string =>
     const localUrl = `${currentOrigin}/results?data=${urlSafeData}`;
     
     console.log('🏠 Generated local results URL:', localUrl);
+    
+    // Add UTM parameters to the URL for testing
+    const testUrl = `${currentOrigin}/?first_name=${encodeURIComponent(valuationData.firstName)}&email=${encodeURIComponent(valuationData.email)}&phone=${encodeURIComponent(valuationData.phone)}`;
+    console.log('🧪 Test URL with UTM parameters:', testUrl);
+    
     return localUrl;
   } catch (error) {
     console.error('❌ Error generating local results URL:', error);
