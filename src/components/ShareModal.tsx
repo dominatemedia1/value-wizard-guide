@@ -17,20 +17,35 @@ const ShareModal = ({ isOpen, onClose, shareUrl, externalUrl }: ShareModalProps)
 
   const handleCopyUrl = async (url: string, label: string) => {
     try {
-      await navigator.clipboard.writeText(url);
-      setCopiedUrl(label);
-      setTimeout(() => setCopiedUrl(null), 2000);
-    } catch (error) {
-      console.log('Clipboard not available, manual copy needed');
-      // Select the text for manual copying
+      // Try navigator.clipboard first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        setCopiedUrl(label);
+        setTimeout(() => setCopiedUrl(null), 2000);
+        return;
+      }
+      
+      // Fallback to manual selection
       const input = document.createElement('input');
       input.value = url;
       document.body.appendChild(input);
       input.select();
-      document.execCommand('copy');
+      input.setSelectionRange(0, 99999); // For mobile devices
+      
+      // Try execCommand as fallback
+      const successful = document.execCommand('copy');
       document.body.removeChild(input);
-      setCopiedUrl(label);
-      setTimeout(() => setCopiedUrl(null), 2000);
+      
+      if (successful) {
+        setCopiedUrl(label);
+        setTimeout(() => setCopiedUrl(null), 2000);
+      } else {
+        // Show manual copy instructions
+        alert('Please manually copy the URL from the text field below');
+      }
+    } catch (error) {
+      console.log('Copy failed, showing manual copy instruction');
+      alert('Please manually copy the URL from the text field below');
     }
   };
 
@@ -58,40 +73,23 @@ const ShareModal = ({ isOpen, onClose, shareUrl, externalUrl }: ShareModalProps)
         <div className="space-y-6">
           {/* Primary sharing option */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold">Share on Dominate Media</h3>
+            <h3 className="text-lg font-semibold">Visit Dominate Media</h3>
             <p className="text-sm text-muted-foreground">
-              Professional presentation on our official platform
+              Learn more about our professional services and solutions
             </p>
             <div className="flex gap-2">
               <Button onClick={handleOpenExternal} className="flex-1">
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Open on DominateMedia.io
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => handleCopyUrl(externalUrl, 'external')}
-                className="px-4"
-              >
-                {copiedUrl === 'external' ? (
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
+                Visit DominateMedia.io
               </Button>
             </div>
-            <Input 
-              value={externalUrl} 
-              readOnly 
-              className="text-xs bg-muted"
-              onClick={(e) => e.currentTarget.select()}
-            />
           </div>
 
           {/* Secondary sharing option */}
           <div className="space-y-3 border-t pt-6">
-            <h3 className="text-lg font-semibold">Direct Link</h3>
+            <h3 className="text-lg font-semibold">Share Your Results</h3>
             <p className="text-sm text-muted-foreground">
-              Share the current page directly
+              Share this link to show others your valuation analysis
             </p>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleOpenCurrent} className="flex-1">
@@ -113,7 +111,7 @@ const ShareModal = ({ isOpen, onClose, shareUrl, externalUrl }: ShareModalProps)
             <Input 
               value={shareUrl} 
               readOnly 
-              className="text-xs bg-muted"
+              className="text-xs bg-muted font-mono"
               onClick={(e) => e.currentTarget.select()}
             />
           </div>
@@ -132,8 +130,9 @@ const ShareModal = ({ isOpen, onClose, shareUrl, externalUrl }: ShareModalProps)
           <div className="bg-muted/50 rounded-lg p-4 text-sm">
             <p className="font-medium mb-2">Sharing Tips:</p>
             <ul className="space-y-1 text-muted-foreground">
-              <li>• Use the Dominate Media link for professional presentations</li>
-              <li>• Direct links work best for internal team sharing</li>
+              <li>• Click "Open in New Tab" to view your results in a new window</li>
+              <li>• Use the copy button to get the shareable link</li>
+              <li>• Visit Dominate Media to learn about our services</li>
               <li>• All links preserve your complete valuation analysis</li>
             </ul>
           </div>

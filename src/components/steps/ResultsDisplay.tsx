@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +7,11 @@ import {
   TrendingUp, DollarSign, Target, Zap, Award, ChevronRight, 
   BarChart3, Users, Clock, Shield, ArrowUp, ArrowDown,
   CheckCircle, AlertTriangle, Lightbulb, Trophy, 
-  Calculator, PieChart, TrendingDown, Share2, ExternalLink, Play, Copy
+  PieChart, TrendingDown, Share2, ExternalLink, Play, Copy
 } from 'lucide-react';
 import { ValuationData } from '../ValuationGuide';
 import { calculateAccurateValuation, NewValuationData } from '../../utils/newValuationCalculator';
-import { generateRobustShareableUrl, generateExternalShareableUrl, testUrlGeneration } from '../../utils/robustUrlSharing';
+import { generateLocalResultsUrl, generateShareableUrl } from '../../utils/urlSharing';
 import ShareModal from '../ShareModal';
 
 interface ResultsDisplayProps {
@@ -40,17 +39,12 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
   // Calculate valuation using the new calculator
   const valuation = calculateAccurateValuation(newValuationData);
 
-  // Generate URLs using the robust system
-  const currentShareUrl = generateRobustShareableUrl(valuationData);
-  const externalShareUrl = generateExternalShareableUrl(valuationData);
+  // Generate URLs using the simplified system
+  const currentShareUrl = generateLocalResultsUrl(valuationData);
+  const externalShareUrl = 'https://dominatemedia.io';
 
-  // Test URL generation in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🧪 Testing URL generation...');
-    testUrlGeneration(valuationData);
-    console.log('📋 Current share URL:', currentShareUrl);
-    console.log('🌐 External share URL:', externalShareUrl);
-  }
+  console.log('📋 Current share URL:', currentShareUrl);
+  console.log('🌐 External share URL:', externalShareUrl);
 
   const handleShare = () => {
     console.log('📋 Opening share modal...');
@@ -126,24 +120,10 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
 
   return (
     <div className="space-y-12 w-full max-w-none">
-      {/* Hero Section - Full width desktop optimization */}
+      {/* Main Results Section - Removed icon, title, and subtitle */}
       <div className="text-center space-y-8">
-        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full mb-6">
-          <Calculator className="w-12 h-12 text-primary" />
-        </div>
-        
-        <div className="space-y-4">
-          <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent leading-tight">
-            Your Complete Valuation Analysis
-          </h1>
-          
-          <p className="text-lg lg:text-xl xl:text-2xl text-muted-foreground max-w-5xl mx-auto leading-relaxed">
-            AI-powered valuation analysis based on 15,000+ company benchmarks
-          </p>
-        </div>
-
         {/* Share buttons */}
-        <div className="flex justify-center gap-4 lg:gap-6 pt-4">
+        <div className="flex justify-center gap-4 lg:gap-6">
           <Button onClick={handleShare} variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4">
             <Share2 className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
             Share Results
@@ -155,7 +135,7 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
         </div>
         
         {/* Enhanced value cards with full desktop width */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 xl:gap-12 w-full max-w-7xl mx-auto pt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 xl:gap-12 w-full max-w-7xl mx-auto">
           <Card className="border-2 border-primary/20 relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
             <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full -mr-10 -mt-10"></div>
             <CardContent className="p-6 lg:p-8 xl:p-10 text-center relative">

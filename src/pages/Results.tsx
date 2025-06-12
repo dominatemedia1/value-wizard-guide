@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import ResultsDisplay from '@/components/steps/ResultsDisplay';
 import { ValuationData } from '@/components/ValuationGuide';
 import { decodeUrlData } from '@/utils/urlSharing';
-import { decodeRobustUrlData } from '@/utils/robustUrlSharing';
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -17,47 +16,29 @@ const Results = () => {
   const [dataSource, setDataSource] = useState<string>('');
 
   useEffect(() => {
-    console.log('🚀 Results page loading with robust URL handling...');
+    console.log('🚀 Results page loading with simplified URL handling...');
     console.log('🔍 Current URL:', window.location.href);
     console.log('🔍 Search params:', Object.fromEntries(searchParams.entries()));
     
-    // Try new robust format first (parameter 'd')
-    const robustEncodedData = searchParams.get('d');
-    if (robustEncodedData) {
-      console.log('🔄 Attempting robust URL decode...');
+    // Try to get data from URL parameter 'data'
+    const encodedData = searchParams.get('data');
+    if (encodedData) {
+      console.log('🔄 Attempting URL decode...');
       try {
-        const decodedData = decodeRobustUrlData(robustEncodedData);
+        const decodedData = decodeUrlData(encodedData);
         if (decodedData) {
-          console.log('✅ Successfully loaded data from robust URL format');
+          console.log('✅ Successfully loaded data from URL');
           setValuationData(decodedData);
-          setDataSource('Robust URL format');
+          setDataSource('URL parameter');
           setLoading(false);
           return;
         }
       } catch (error) {
-        console.error('❌ Robust URL decode failed:', error);
-      }
-    }
-    
-    // Fallback to legacy format (parameter 'data')
-    const legacyEncodedData = searchParams.get('data');
-    if (legacyEncodedData) {
-      console.log('🔄 Attempting legacy URL decode...');
-      try {
-        const decodedData = decodeUrlData(legacyEncodedData);
-        if (decodedData) {
-          console.log('✅ Successfully loaded data from legacy URL format');
-          setValuationData(decodedData);
-          setDataSource('Legacy URL format');
-          setLoading(false);
-          return;
-        }
-      } catch (error) {
-        console.error('❌ Legacy URL decode failed:', error);
+        console.error('❌ URL decode failed:', error);
       }
     }
 
-    // Final fallback to localStorage
+    // Fallback to localStorage
     console.log('🔄 Falling back to localStorage...');
     try {
       const stored = localStorage.getItem('valuationData');
@@ -111,8 +92,7 @@ const Results = () => {
                 <strong>Debug Info:</strong><br/>
                 URL: {window.location.href}<br/>
                 Data source attempted: {dataSource || 'None'}<br/>
-                Robust param: {searchParams.get('d') ? 'Present' : 'Missing'}<br/>
-                Legacy param: {searchParams.get('data') ? 'Present' : 'Missing'}
+                URL param: {searchParams.get('data') ? 'Present' : 'Missing'}
               </div>
             </div>
             <Link to="/">
@@ -145,14 +125,6 @@ const Results = () => {
               Back to Assessment
             </Button>
           </Link>
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Valuation Results
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Your comprehensive company valuation analysis
-            </p>
-          </div>
         </div>
 
         {/* Results with better spacing */}

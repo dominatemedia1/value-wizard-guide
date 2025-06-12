@@ -1,9 +1,9 @@
 
 import { ValuationData } from '../components/ValuationGuide';
 
-export const generateShareableUrl = (valuationData: ValuationData, baseUrl: string = 'https://www.dominatemedia.io/unicorn-valuation/results'): string => {
+export const generateShareableUrl = (valuationData: ValuationData, baseUrl: string = 'https://dominatemedia.io'): string => {
   try {
-    console.log('🔄 Starting URL generation process...');
+    console.log('🔄 Starting simplified URL generation...');
     console.log('📝 Input valuation data:', valuationData);
     
     // Create a minimal data object with only essential fields
@@ -28,11 +28,11 @@ export const generateShareableUrl = (valuationData: ValuationData, baseUrl: stri
 
     console.log('📦 Prepared shareable data:', shareableData);
 
-    // Convert to JSON string first
+    // Convert to JSON string
     const jsonString = JSON.stringify(shareableData);
     console.log('📄 JSON string length:', jsonString.length);
 
-    // Encode as base64
+    // Simple base64 encoding
     const base64Data = btoa(jsonString);
     console.log('🔒 Base64 encoded length:', base64Data.length);
 
@@ -109,7 +109,7 @@ export const generateLocalResultsUrl = (valuationData: ValuationData): string =>
 export const decodeUrlData = (encodedData: string): ValuationData | null => {
   try {
     console.log('🔓 Starting decode process...');
-    console.log('📥 Raw encoded data received:', encodedData);
+    console.log('📥 Raw encoded data received:', encodedData.substring(0, 50) + '...');
     
     if (!encodedData || encodedData.trim() === '') {
       console.error('❌ Empty or null encoded data');
@@ -127,6 +127,8 @@ export const decodeUrlData = (encodedData: string): ValuationData | null => {
       base64Data += '='.repeat(paddingNeeded);
     }
     
+    console.log('🔄 Attempting base64 decode...');
+    
     // Decode base64 to string
     const decodedString = atob(base64Data);
     console.log('📄 Decoded string length:', decodedString.length);
@@ -138,12 +140,15 @@ export const decodeUrlData = (encodedData: string): ValuationData | null => {
     // Validate that we have the essential fields
     if (!parsedData.firstName || !parsedData.email || !parsedData.companyName) {
       console.error('❌ Missing essential fields in decoded data');
+      console.log('📋 Available fields:', Object.keys(parsedData));
       return null;
     }
     
+    console.log('✅ Data validation passed');
     return parsedData as ValuationData;
   } catch (error) {
     console.error('❌ Error decoding URL data:', error);
+    console.log('🔍 Error details:', error);
     return null;
   }
 };
