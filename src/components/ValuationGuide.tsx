@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import ExitPopup from './ExitPopup';
@@ -140,10 +141,31 @@ const ValuationGuide = () => {
     }
   };
 
+  // Use different layouts for results vs steps
+  if (showResults) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="container mx-auto px-6 py-8 max-w-none">
+          <div className="animate-fade-in">
+            <StepRenderer
+              currentStep={currentStep}
+              showResults={showResults}
+              showResultsWaiting={showResultsWaiting}
+              valuationData={valuationData}
+              updateValuationData={updateValuationData}
+              nextStep={nextStep}
+              previousStep={previousStep}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-start justify-center pt-[45px] p-4">
-      <Card className="w-full max-w-2xl mx-auto border-2 border-border bg-card/95 backdrop-blur-sm">
-        <CardContent className="p-8">
+      <Card className="w-full max-w-4xl mx-auto border-2 border-border bg-card/95 backdrop-blur-sm">
+        <CardContent className="p-10">
           <StepProgress
             currentStep={currentStep}
             totalSteps={totalSteps}

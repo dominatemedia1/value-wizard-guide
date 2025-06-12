@@ -8,7 +8,7 @@ import {
   TrendingUp, DollarSign, Target, Zap, Award, ChevronRight, 
   BarChart3, Users, Clock, Shield, ArrowUp, ArrowDown,
   CheckCircle, AlertTriangle, Lightbulb, Trophy, 
-  Calculator, PieChart, TrendingDown, Share2, ExternalLink, Play
+  Calculator, PieChart, TrendingDown, Share2, ExternalLink, Play, Copy
 } from 'lucide-react';
 import { ValuationData } from '../ValuationGuide';
 import { calculateAccurateValuation, NewValuationData } from '../../utils/newValuationCalculator';
@@ -41,23 +41,29 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
 
   const handleShare = async () => {
     try {
-      const currentUrl = window.location.href;
-      console.log('📋 Current URL for sharing:', currentUrl);
-      await navigator.clipboard.writeText(currentUrl);
+      console.log('📋 Share button clicked, generating URL...');
+      
+      // Generate a proper shareable URL with the data
+      const shareableUrl = generateLocalResultsUrl(valuationData);
+      console.log('📋 Generated shareable URL:', shareableUrl);
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareableUrl);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
-      console.log('📋 Copied current URL to clipboard');
+      console.log('📋 Successfully copied URL to clipboard');
     } catch (error) {
       console.error('❌ Failed to copy URL:', error);
-      // Fallback to generating shareable URL
+      
+      // Fallback - try to copy current URL
       try {
-        const shareableUrl = generateShareableUrl(valuationData);
-        await navigator.clipboard.writeText(shareableUrl);
+        await navigator.clipboard.writeText(window.location.href);
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 2000);
-        console.log('📋 Copied fallback shareable URL to clipboard');
+        console.log('📋 Copied current URL as fallback');
       } catch (fallbackError) {
-        console.error('❌ Failed to copy fallback URL:', fallbackError);
+        console.error('❌ Clipboard access failed completely:', fallbackError);
+        alert('Unable to copy link. Please copy the URL manually from your browser.');
       }
     }
   };
@@ -129,139 +135,75 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
     }
   ];
 
-  const competitiveAnalysis = [
-    {
-      segment: 'Top 10% of SaaS Companies',
-      multiple: '8.5x - 12x',
-      characteristics: 'NRR >120%, Growth >50%, Profitable',
-      gap: valuation.current < (valuationData.arrSliderValue * 8.5) ? `${formatCurrency((valuationData.arrSliderValue * 8.5) - valuation.current)} gap` : 'Within range'
-    },
-    {
-      segment: 'Median SaaS Companies',
-      multiple: '3.5x - 5.5x', 
-      characteristics: 'NRR 100-110%, Growth 20-40%, Break-even',
-      gap: valuation.vsMedian >= 0 ? `${formatPercentage(valuation.vsMedian)} above` : `${formatPercentage(Math.abs(valuation.vsMedian))} below`
-    },
-    {
-      segment: 'Bottom 25% of SaaS Companies',
-      multiple: '1.5x - 2.5x',
-      characteristics: 'NRR <100%, Growth <20%, Burning cash',
-      gap: valuation.current > (valuationData.arrSliderValue * 2.5) ? 'Above this tier' : 'Risk zone'
-    }
-  ];
-
-  const actionPlan = valuation.allOpportunities.slice(0, 3).map((opp, index) => ({
-    priority: index + 1,
-    area: opp.factor,
-    impact: formatCurrency(opp.impact),
-    timeframe: index === 0 ? '3-6 months' : index === 1 ? '6-12 months' : '12+ months',
-    difficulty: index === 0 ? 'Medium' : index === 1 ? 'High' : 'Medium',
-    description: opp.description,
-    specificActions: getSpecificActions(opp.factor)
-  }));
-
-  function getSpecificActions(factor: string): string[] {
-    const actions: { [key: string]: string[] } = {
-      'Net Revenue Retention': [
-        'Implement customer success programs',
-        'Develop upselling automation',
-        'Create expansion revenue workflows',
-        'Build customer health scoring'
-      ],
-      'Growth Rate': [
-        'Optimize conversion funnels',
-        'Scale high-performing channels',
-        'Implement product-led growth',
-        'Expand to new market segments'
-      ],
-      'Revenue Retention': [
-        'Analyze churn patterns',
-        'Improve onboarding experience',
-        'Build retention campaigns',
-        'Enhance product stickiness'
-      ],
-      'Profitability': [
-        'Optimize cost structure',
-        'Increase pricing strategically',
-        'Improve unit economics',
-        'Automate operations'
-      ],
-      'Market Gravity': [
-        'Build thought leadership content',
-        'Invest in SEO and content marketing',
-        'Create community programs',
-        'Develop strategic partnerships'
-      ],
-      'CAC Efficiency': [
-        'Optimize ad targeting',
-        'Improve landing page conversion',
-        'Develop referral programs',
-        'Focus on high-LTV channels'
-      ]
-    };
-    return actions[factor] || ['Focus on operational excellence', 'Measure and optimize key metrics'];
-  }
-
   return (
-    <div className="space-y-12">
-      {/* Hero Section with better spacing */}
-      <div className="text-center space-y-8">
-        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full mb-6">
-          <Calculator className="w-12 h-12 text-primary" />
+    <div className="space-y-16 max-w-7xl mx-auto">
+      {/* Hero Section - Optimized for desktop */}
+      <div className="text-center space-y-10">
+        <div className="inline-flex items-center justify-center w-28 h-28 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full mb-8">
+          <Calculator className="w-14 h-14 text-primary" />
         </div>
         
-        <div className="space-y-4">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent leading-tight">
+        <div className="space-y-6">
+          <h1 className="text-6xl lg:text-7xl font-bold bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent leading-tight">
             Your Complete Valuation Analysis
           </h1>
           
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
             AI-powered valuation analysis based on 15,000+ company benchmarks
           </p>
         </div>
 
         {/* Share buttons */}
-        <div className="flex justify-center gap-4 pt-4">
-          <Button onClick={handleShare} variant="outline" size="sm">
-            <Share2 className="w-4 h-4 mr-2" />
-            {copySuccess ? 'Copied!' : 'Copy Share Link'}
+        <div className="flex justify-center gap-6 pt-6">
+          <Button onClick={handleShare} variant="outline" size="lg" className="text-lg px-8 py-4">
+            {copySuccess ? (
+              <>
+                <CheckCircle className="w-5 h-5 mr-3 text-green-600" />
+                Link Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="w-5 h-5 mr-3" />
+                Copy Share Link
+              </>
+            )}
           </Button>
-          <Button onClick={handleViewExternal} variant="outline" size="sm">
-            <ExternalLink className="w-4 h-4 mr-2" />
+          <Button onClick={handleViewExternal} variant="outline" size="lg" className="text-lg px-8 py-4">
+            <ExternalLink className="w-5 h-5 mr-3" />
             View on Dominate Media
           </Button>
         </div>
         
-        {/* Enhanced value cards with better spacing */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto pt-8">
-          <Card className="border-2 border-primary/20 relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full -mr-10 -mt-10"></div>
-            <CardContent className="p-8 text-center relative">
-              <h3 className="text-xl font-semibold text-muted-foreground mb-4">Current Valuation</h3>
-              <p className="text-4xl font-bold text-primary mb-3">{formatCurrency(valuation.current)}</p>
-              <p className="text-base text-muted-foreground">
+        {/* Enhanced value cards with better desktop spacing */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 max-w-7xl mx-auto pt-12">
+          <Card className="border-2 border-primary/20 relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12"></div>
+            <CardContent className="p-10 text-center relative">
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-6">Current Valuation</h3>
+              <p className="text-5xl font-bold text-primary mb-4">{formatCurrency(valuation.current)}</p>
+              <p className="text-lg text-muted-foreground">
                 {(valuation.current / valuationData.arrSliderValue).toFixed(1)}x Revenue Multiple
               </p>
             </CardContent>
           </Card>
           
-          <Card className="border-2 border-green-500/20 relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -mr-10 -mt-10"></div>
-            <CardContent className="p-8 text-center relative">
-              <h3 className="text-xl font-semibold text-muted-foreground mb-4">Optimized Valuation</h3>
-              <p className="text-4xl font-bold text-green-600 mb-3">{formatCurrency(valuation.optimized)}</p>
-              <p className="text-base text-muted-foreground">
+          <Card className="border-2 border-green-500/20 relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full -mr-12 -mt-12"></div>
+            <CardContent className="p-10 text-center relative">
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-6">Optimized Valuation</h3>
+              <p className="text-5xl font-bold text-green-600 mb-4">{formatCurrency(valuation.optimized)}</p>
+              <p className="text-lg text-muted-foreground">
                 {((valuation.optimized / valuation.current - 1) * 100).toFixed(0)}% Increase Potential
               </p>
             </CardContent>
           </Card>
           
-          <Card className="border-2 border-orange-500/20 relative overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
-            <CardContent className="p-8 text-center relative">
-              <h3 className="text-xl font-semibold text-muted-foreground mb-4">Opportunity Value</h3>
-              <p className="text-4xl font-bold text-orange-600 mb-3">{formatCurrency(valuation.leftOnTable)}</p>
-              <p className="text-base text-muted-foreground">
+          <Card className="border-2 border-orange-500/20 relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full -mr-12 -mt-12"></div>
+            <CardContent className="p-10 text-center relative">
+              <h3 className="text-2xl font-semibold text-muted-foreground mb-6">Opportunity Value</h3>
+              <p className="text-5xl font-bold text-orange-600 mb-4">{formatCurrency(valuation.leftOnTable)}</p>
+              <p className="text-lg text-muted-foreground">
                 Money Left on the Table
               </p>
             </CardContent>
@@ -269,329 +211,83 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
         </div>
       </div>
 
-      {/* Detailed Analysis Tabs with better spacing */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-14 text-base">
-          <TabsTrigger value="overview" className="text-sm md:text-base">Overview</TabsTrigger>
-          <TabsTrigger value="metrics" className="text-sm md:text-base">Metrics Deep Dive</TabsTrigger>
-          <TabsTrigger value="competitive" className="text-sm md:text-base">Competitive Analysis</TabsTrigger>
-          <TabsTrigger value="roadmap" className="text-sm md:text-base">Action Roadmap</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-10 mt-8">
-          {/* Key Metrics Cards with enhanced spacing */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {metrics.map((metric, index) => {
-              const Icon = metric.icon;
-              const percentage = (metric.score / 5) * 100;
-              
-              return (
-                <Card key={index} className="hover:shadow-lg transition-all duration-300 border border-border/50">
-                  <CardContent className="p-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-primary/10 rounded-xl">
-                          <Icon className="w-7 h-7 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">{metric.label}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">{metric.description}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`flex items-center space-x-2 ${getScoreColor(metric.score)}`}>
-                          {getScoreIcon(metric.score)}
-                          <span className="text-3xl font-bold">{metric.score}/5</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Progress value={percentage} className="h-3 mb-6" />
-                    
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between py-2">
-                        <span className="text-muted-foreground">Multiplier Impact:</span>
-                        <span className="font-semibold">{metric.multiplier.toFixed(2)}x</span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-muted-foreground">Benchmark:</span>
-                        <span className="font-semibold">{metric.benchmark}</span>
-                      </div>
-                      <div className="mt-4 p-4 bg-muted/50 rounded-xl">
-                        <p className="text-sm text-muted-foreground">
-                          <Lightbulb className="w-4 h-4 inline mr-2" />
-                          {metric.recommendation}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+      {/* YouTube Marketing Enhancement Section - Larger for desktop */}
+      <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200 shadow-xl">
+        <CardContent className="p-12">
+          <h2 className="text-4xl font-bold text-foreground mb-10 flex items-center">
+            <Play className="w-10 h-10 text-red-600 mr-4" />
+            YouTube Marketing: Your Growth Catalyst
+          </h2>
+          
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-10 border border-red-100">
+            <h3 className="text-2xl font-semibold text-foreground mb-6 flex items-center">
+              <TrendingUp className="w-7 h-7 mr-4 text-red-600" />
+              Transform Your Customer Acquisition with YouTube Ads
+            </h3>
+            <p className="text-muted-foreground mb-8 text-xl leading-relaxed">
+              Based on your current CAC efficiency metrics, YouTube advertising represents your biggest opportunity 
+              to optimize marketing spend and dramatically improve acquisition costs. This could be the key factor 
+              in unlocking that <strong className="text-red-600">{formatCurrency(valuation.leftOnTable)}</strong> opportunity value.
+            </p>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <div className="bg-red-50 rounded-2xl p-8">
+                <h4 className="font-semibold text-red-700 mb-4 text-xl">Why YouTube Ads Excel for SaaS:</h4>
+                <ul className="space-y-3 text-base text-muted-foreground">
+                  <li className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+                    Lower cost-per-click than Google Ads
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+                    Higher engagement and conversion rates
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+                    Superior brand building capabilities
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+                    Precise B2B audience targeting
+                  </li>
+                </ul>
+              </div>
+              <div className="bg-orange-50 rounded-2xl p-8">
+                <h4 className="font-semibold text-orange-700 mb-4 text-xl">Expected Impact on Your Metrics:</h4>
+                <ul className="space-y-3 text-base text-muted-foreground">
+                  <li className="flex items-start">
+                    <Trophy className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
+                    30-50% reduction in customer acquisition cost
+                  </li>
+                  <li className="flex items-start">
+                    <Trophy className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
+                    2-3x improvement in conversion rates
+                  </li>
+                  <li className="flex items-start">
+                    <Trophy className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
+                    Enhanced brand recognition and trust
+                  </li>
+                  <li className="flex items-start">
+                    <Trophy className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
+                    Scalable, predictable lead generation
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-red-100 to-orange-100 rounded-2xl p-8">
+              <h4 className="font-semibold text-red-700 mb-4 text-xl">Strategic Recommendation:</h4>
+              <p className="text-muted-foreground leading-relaxed text-lg">
+                Given your current CAC challenges, implementing a strategic YouTube advertising campaign 
+                could be the single most impactful change to optimize your customer acquisition funnel. 
+                This investment in YouTube marketing and content creation could directly address your 
+                biggest valuation gap and potentially unlock the full 
+                <strong className="text-red-600"> {formatCurrency(valuation.leftOnTable)}</strong> opportunity.
+              </p>
+            </div>
           </div>
-
-          {/* Priority Insight with enhanced design */}
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-lg">
-            <CardContent className="p-10">
-              <h2 className="text-3xl font-bold text-foreground mb-8 flex items-center">
-                <Zap className="w-8 h-8 text-primary mr-3" />
-                Priority Focus Area
-              </h2>
-              
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-8 border border-white/20">
-                <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                  <Target className="w-6 h-6 mr-3 text-primary" />
-                  {valuation.biggestLeak} - {formatCurrency(valuation.biggestOpportunity)} Opportunity
-                </h3>
-                <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-                  Your biggest opportunity for valuation improvement. Fixing this single area could unlock 
-                  <strong className="text-primary"> {formatCurrency(valuation.biggestOpportunity)}</strong> in additional enterprise value.
-                </p>
-                
-                <div className="bg-primary/10 rounded-xl p-6">
-                  <h4 className="font-semibold text-primary mb-3 text-lg">Immediate Next Steps:</h4>
-                  <p className="text-muted-foreground leading-relaxed">{valuation.improvementDescription}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* YouTube Marketing Enhancement Section */}
-          <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200 shadow-lg">
-            <CardContent className="p-10">
-              <h2 className="text-3xl font-bold text-foreground mb-8 flex items-center">
-                <Play className="w-8 h-8 text-red-600 mr-3" />
-                YouTube Marketing Opportunity
-              </h2>
-              
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-red-100">
-                <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                  <TrendingUp className="w-6 h-6 mr-3 text-red-600" />
-                  Scale Your Customer Acquisition with YouTube
-                </h3>
-                <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-                  Based on your current CAC efficiency metrics, YouTube advertising could be the game-changer 
-                  for optimizing your marketing spend and dramatically improving your acquisition costs.
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-red-50 rounded-xl p-6">
-                    <h4 className="font-semibold text-red-700 mb-3 text-lg">Why YouTube Works for SaaS:</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• Lower CPCs than Google Ads</li>
-                      <li>• Higher engagement rates</li>
-                      <li>• Better brand building</li>
-                      <li>• Precise B2B targeting</li>
-                    </ul>
-                  </div>
-                  <div className="bg-orange-50 rounded-xl p-6">
-                    <h4 className="font-semibold text-orange-700 mb-3 text-lg">Potential Impact:</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• 30-50% reduction in CAC</li>
-                      <li>• 2-3x better conversion rates</li>
-                      <li>• Improved brand recognition</li>
-                      <li>• Scalable lead generation</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-r from-red-100 to-orange-100 rounded-xl p-6">
-                  <h4 className="font-semibold text-red-700 mb-3 text-lg">Next Steps:</h4>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Consider investing in YouTube ads and content marketing to optimize your customer acquisition. 
-                    This could be the key factor in improving your CAC efficiency and unlocking that 
-                    <strong className="text-red-600"> {formatCurrency(valuation.leftOnTable)}</strong> opportunity value.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="metrics" className="space-y-8 mt-8">
-          <Card className="shadow-lg">
-            <CardContent className="p-10">
-              <h2 className="text-3xl font-bold text-foreground mb-8">Valuation Multiplier Breakdown</h2>
-              
-              <div className="space-y-8">
-                <div className="bg-muted/50 rounded-xl p-8">
-                  <h3 className="text-xl font-semibold mb-6">Base Calculation</h3>
-                  <div className="text-base space-y-3">
-                    <div className="flex justify-between py-2">
-                      <span>Annual Recurring Revenue (ARR)</span>
-                      <span className="font-bold">{formatCurrency(valuationData.arrSliderValue)}</span>
-                    </div>
-                    <div className="flex justify-between py-2">
-                      <span>Base Multiple</span>
-                      <span className="font-bold">{valuation.multiplierBreakdown.base}x</span>
-                    </div>
-                    <hr className="my-4" />
-                    <div className="flex justify-between text-xl py-2">
-                      <span>Base Valuation</span>
-                      <span className="font-bold">{formatCurrency(valuationData.arrSliderValue * valuation.multiplierBreakdown.base)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {Object.entries(valuation.multiplierBreakdown).map(([key, value]) => {
-                    if (key === 'base') return null;
-                    
-                    const labels: { [key: string]: string } = {
-                      nrr: 'Net Revenue Retention',
-                      growth: 'Growth Rate',
-                      churn: 'Revenue Retention',
-                      profitability: 'Profitability',
-                      marketGravity: 'Market Gravity',
-                      cac: 'CAC Efficiency',
-                      businessModel: 'Business Model'
-                    };
-
-                    const impact = (value as number - 1) * 100;
-                    
-                    return (
-                      <div key={key} className="bg-white/70 rounded-xl p-6 border border-border/30">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="font-semibold text-base">{labels[key]}</span>
-                          <span className="font-bold text-lg">{(value as number).toFixed(2)}x</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {impact >= 0 ? (
-                            <ArrowUp className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <ArrowDown className="w-5 h-5 text-red-600" />
-                          )}
-                          <span className={`text-sm font-medium ${impact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {impact >= 0 ? '+' : ''}{impact.toFixed(0)}% impact
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="competitive" className="space-y-8 mt-8">
-          <Card className="shadow-lg">
-            <CardContent className="p-10">
-              <h2 className="text-3xl font-bold text-foreground mb-8 flex items-center">
-                <BarChart3 className="w-8 h-8 mr-3" />
-                Market Position Analysis
-              </h2>
-              
-              <div className="space-y-8">
-                {competitiveAnalysis.map((tier, index) => (
-                  <div key={index} className="border border-border/50 rounded-xl p-8 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-6">
-                      <div>
-                        <h3 className="font-semibold text-xl">{tier.segment}</h3>
-                        <p className="text-muted-foreground text-base mt-2">{tier.characteristics}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-bold text-primary text-xl">{tier.multiple}</span>
-                        <p className="text-sm text-muted-foreground mt-1">Revenue Multiple</p>
-                      </div>
-                    </div>
-                    <div className="bg-muted/50 rounded-lg p-4">
-                      <span className="text-base font-medium">Your Position: </span>
-                      <span className="text-base">{tier.gap}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-10 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
-                <h3 className="font-semibold mb-6 text-xl">Market Percentile Ranking</h3>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-3">
-                      <span className="text-base">Your Performance vs Market Median</span>
-                      <span className={`font-bold text-lg ${valuation.vsMedian >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatPercentage(valuation.vsMedian)}
-                      </span>
-                    </div>
-                    <Progress value={Math.max(0, Math.min(100, 50 + valuation.vsMedian))} className="h-3" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-3">
-                      <span className="text-base">Distance to Optimal Performance</span>
-                      <span className="font-bold text-orange-600 text-lg">
-                        {formatPercentage(valuation.vsOptimal)}
-                      </span>
-                    </div>
-                    <Progress value={Math.max(0, 100 + valuation.vsOptimal)} className="h-3" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="roadmap" className="space-y-8 mt-8">
-          <Card className="shadow-lg">
-            <CardContent className="p-10">
-              <h2 className="text-3xl font-bold text-foreground mb-8 flex items-center">
-                <Target className="w-8 h-8 mr-3" />
-                Strategic Improvement Roadmap
-              </h2>
-              
-              <div className="space-y-8">
-                {actionPlan.map((action, index) => (
-                  <div key={index} className="border border-border/50 rounded-xl p-8 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="flex items-center space-x-6">
-                        <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full">
-                          <span className="font-bold text-primary text-lg">{action.priority}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-xl">{action.area}</h3>
-                          <p className="text-muted-foreground text-base mt-2">{action.description}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-bold text-green-600 text-2xl">{action.impact}</span>
-                        <p className="text-sm text-muted-foreground mt-1">Potential Value</p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                      <div className="bg-muted/50 rounded-lg p-4">
-                        <span className="text-xs text-muted-foreground block uppercase tracking-wide">TIMEFRAME</span>
-                        <span className="font-medium text-base">{action.timeframe}</span>
-                      </div>
-                      <div className="bg-muted/50 rounded-lg p-4">
-                        <span className="text-xs text-muted-foreground block uppercase tracking-wide">DIFFICULTY</span>
-                        <span className="font-medium text-base">{action.difficulty}</span>
-                      </div>
-                      <div className="bg-muted/50 rounded-lg p-4">
-                        <span className="text-xs text-muted-foreground block uppercase tracking-wide">PRIORITY</span>
-                        <span className="font-medium text-base">
-                          {action.priority === 1 ? 'Critical' : action.priority === 2 ? 'High' : 'Medium'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-4 text-lg">Specific Action Items:</h4>
-                      <ul className="space-y-3">
-                        {action.specificActions.map((specificAction, actionIndex) => (
-                          <li key={actionIndex} className="flex items-center space-x-3 text-base">
-                            <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                            <span>{specificAction}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

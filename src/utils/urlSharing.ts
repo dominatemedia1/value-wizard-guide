@@ -63,11 +63,43 @@ export const generateLocalResultsUrl = (valuationData: ValuationData): string =>
   try {
     console.log('🏠 Generating local results URL...');
     
-    // Simple approach - just return current URL since the results are already displayed
-    const currentUrl = window.location.href;
-    console.log('🏠 Current URL for sharing:', currentUrl);
+    // Get current origin and create results URL with data
+    const baseUrl = `${window.location.origin}/results`;
     
-    return currentUrl;
+    // Use the same encoding as generateShareableUrl
+    const shareableData = {
+      arrSliderValue: valuationData.arrSliderValue,
+      nrr: valuationData.nrr,
+      revenueChurn: valuationData.revenueChurn,
+      qoqGrowthRate: valuationData.qoqGrowthRate,
+      cac: valuationData.cac,
+      cacContext: valuationData.cacContext,
+      profitability: valuationData.profitability,
+      marketGravity: valuationData.marketGravity,
+      businessModel: valuationData.businessModel,
+      firstName: valuationData.firstName,
+      lastName: valuationData.lastName,
+      email: valuationData.email,
+      phone: valuationData.phone || '',
+      companyName: valuationData.companyName,
+      website: valuationData.website || '',
+      timestamp: new Date().toISOString()
+    };
+
+    const jsonString = JSON.stringify(shareableData);
+    const base64Data = btoa(jsonString);
+    const urlSafeData = base64Data
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+    
+    const url = new URL(baseUrl);
+    url.searchParams.set('data', urlSafeData);
+    
+    const finalUrl = url.toString();
+    console.log('🏠 Generated local results URL:', finalUrl);
+    
+    return finalUrl;
   } catch (error) {
     console.error('❌ Error generating local results URL:', error);
     return `${window.location.origin}/results`;
