@@ -101,7 +101,7 @@ const ValuationGuide = () => {
       console.log('🚀 Form validation starting...');
       console.log('📝 Current valuation data:', valuationData);
       
-      const requiredFields = ['firstName', 'lastName', 'email', 'companyName'];
+      const requiredFields = ['firstName', 'email', 'phone', 'companyName', 'website'];
       const missingFields = requiredFields.filter(field => !valuationData[field as keyof ValuationData]);
       
       if (missingFields.length > 0) {

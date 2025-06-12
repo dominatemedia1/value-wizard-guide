@@ -111,10 +111,9 @@ const FinalContactStep = ({
   const handleSubmit = async () => {
     console.log('🚀 Submit clicked, validation:', validation);
     
-    // Mark all fields as touched to show validation errors
+    // Mark all fields as touched to show validation errors - excluding lastName
     setTouched({
       firstName: true,
-      lastName: true,
       email: true,
       phone: true,
       companyName: true,

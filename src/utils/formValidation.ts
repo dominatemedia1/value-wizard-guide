@@ -1,4 +1,3 @@
-
 export interface ValidationResult {
   isValid: boolean;
   errors: Record<string, string>;
@@ -42,7 +41,7 @@ export const validateContactForm = (data: {
     errors.firstName = 'First name is required';
   }
 
-  // lastName is now optional - no validation needed
+  // lastName is optional - no validation needed
 
   if (!data.email.trim()) {
     errors.email = 'Email is required';
@@ -54,14 +53,12 @@ export const validateContactForm = (data: {
     errors.companyName = 'Company name is required';
   }
 
-  // Phone is now required
   if (!data.phone.trim()) {
     errors.phone = 'Phone number is required';
   } else if (!validatePhone(data.phone)) {
     errors.phone = 'Please enter a valid phone number';
   }
 
-  // Website is now required
   if (!data.website.trim()) {
     errors.website = 'Website is required';
   } else if (!validateWebsite(data.website)) {
