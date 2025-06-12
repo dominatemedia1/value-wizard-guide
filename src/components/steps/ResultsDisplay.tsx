@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { ValuationData } from '../ValuationGuide';
 import { calculateAccurateValuation, NewValuationData } from '../../utils/newValuationCalculator';
-import { generateShareableUrl } from '../../utils/urlSharing';
+import { generateRobustShareableUrl, generateExternalShareableUrl, testUrlGeneration } from '../../utils/robustUrlSharing';
+import ShareModal from '../ShareModal';
 
 interface ResultsDisplayProps {
   valuationData: ValuationData;
@@ -21,7 +22,7 @@ interface ResultsDisplayProps {
 
 const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Prepare data for new calculation
   const newValuationData: NewValuationData = {
@@ -39,23 +40,26 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
   // Calculate valuation using the new calculator
   const valuation = calculateAccurateValuation(newValuationData);
 
-  const handleShare = async () => {
-    try {
-      console.log('📋 Share button clicked, copying current URL...');
-      const currentUrl = window.location.href;
-      await navigator.clipboard.writeText(currentUrl);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-      console.log('📋 Successfully copied current URL to clipboard');
-    } catch (error) {
-      console.error('❌ Failed to copy URL:', error);
-      alert('Unable to copy link. Please copy the URL manually from your browser.');
-    }
+  // Generate URLs using the robust system
+  const currentShareUrl = generateRobustShareableUrl(valuationData);
+  const externalShareUrl = generateExternalShareableUrl(valuationData);
+
+  // Test URL generation in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🧪 Testing URL generation...');
+    testUrlGeneration(valuationData);
+    console.log('📋 Current share URL:', currentShareUrl);
+    console.log('🌐 External share URL:', externalShareUrl);
+  }
+
+  const handleShare = () => {
+    console.log('📋 Opening share modal...');
+    setShowShareModal(true);
   };
 
   const handleViewExternal = () => {
-    const externalUrl = generateShareableUrl(valuationData);
-    window.open(externalUrl, '_blank');
+    console.log('🌐 Opening external URL...');
+    window.open(externalShareUrl, '_blank');
   };
 
   // Helper functions for display
@@ -141,17 +145,8 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
         {/* Share buttons */}
         <div className="flex justify-center gap-4 lg:gap-6 pt-4">
           <Button onClick={handleShare} variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4">
-            {copySuccess ? (
-              <>
-                <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 text-green-600" />
-                Link Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
-                Copy Share Link
-              </>
-            )}
+            <Share2 className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
+            Share Results
           </Button>
           <Button onClick={handleViewExternal} variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4">
             <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
@@ -493,6 +488,14 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
           </div>
         </CardContent>
       </Card>
+
+      {/* Share Modal */}
+      <ShareModal 
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        shareUrl={currentShareUrl}
+        externalUrl={externalShareUrl}
+      />
     </div>
   );
 };

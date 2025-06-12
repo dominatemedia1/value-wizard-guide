@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import ResultsDisplay from '@/components/steps/ResultsDisplay';
 import { ValuationData } from '@/components/ValuationGuide';
 import { decodeUrlData } from '@/utils/urlSharing';
+import { decodeRobustUrlData } from '@/utils/robustUrlSharing';
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -16,58 +17,57 @@ const Results = () => {
   const [dataSource, setDataSource] = useState<string>('');
 
   useEffect(() => {
-    console.log('🚀 Results page loading, starting data retrieval process...');
+    console.log('🚀 Results page loading with robust URL handling...');
     console.log('🔍 Current URL:', window.location.href);
     console.log('🔍 Search params:', Object.fromEntries(searchParams.entries()));
     
-    // Try to get data from URL parameters first
-    const encodedData = searchParams.get('data');
-    console.log('📦 Raw encoded data from URL:', encodedData);
-    console.log('📦 Encoded data type:', typeof encodedData);
-    console.log('📦 Encoded data length:', encodedData?.length || 0);
-    
-    if (encodedData) {
-      console.log('🔄 Attempting to decode URL data...');
+    // Try new robust format first (parameter 'd')
+    const robustEncodedData = searchParams.get('d');
+    if (robustEncodedData) {
+      console.log('🔄 Attempting robust URL decode...');
       try {
-        const decodedData = decodeUrlData(encodedData);
-        console.log('🔄 Decode result:', decodedData);
-        
+        const decodedData = decodeRobustUrlData(robustEncodedData);
         if (decodedData) {
-          console.log('✅ Successfully loaded data from URL parameters');
-          console.log('📦 Decoded data structure:', Object.keys(decodedData));
+          console.log('✅ Successfully loaded data from robust URL format');
           setValuationData(decodedData);
-          setDataSource('URL parameters');
+          setDataSource('Robust URL format');
           setLoading(false);
           return;
-        } else {
-          console.log('❌ Decoding returned null or invalid data');
         }
       } catch (error) {
-        console.error('❌ Error during URL data decoding:', error);
+        console.error('❌ Robust URL decode failed:', error);
       }
-    } else {
-      console.log('📭 No encoded data found in URL parameters');
+    }
+    
+    // Fallback to legacy format (parameter 'data')
+    const legacyEncodedData = searchParams.get('data');
+    if (legacyEncodedData) {
+      console.log('🔄 Attempting legacy URL decode...');
+      try {
+        const decodedData = decodeUrlData(legacyEncodedData);
+        if (decodedData) {
+          console.log('✅ Successfully loaded data from legacy URL format');
+          setValuationData(decodedData);
+          setDataSource('Legacy URL format');
+          setLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Legacy URL decode failed:', error);
+      }
     }
 
-    // Fallback to stored data if no URL params or decoding failed
+    // Final fallback to localStorage
     console.log('🔄 Falling back to localStorage...');
     try {
       const stored = localStorage.getItem('valuationData');
-      console.log('📦 Raw localStorage data:', stored?.substring(0, 100) + '...');
-      
       if (stored) {
         const parsedData = JSON.parse(stored);
-        console.log('📦 Parsed localStorage structure:', Object.keys(parsedData));
-        
         if (parsedData.valuationData) {
           console.log('✅ Successfully loaded data from localStorage');
           setValuationData(parsedData.valuationData);
           setDataSource('localStorage');
-        } else {
-          console.log('❌ No valuationData field in localStorage');
         }
-      } else {
-        console.log('❌ No data found in localStorage');
       }
     } catch (error) {
       console.error('❌ Error loading stored data:', error);
@@ -110,7 +110,9 @@ const Results = () => {
               <div className="mt-4 p-3 bg-muted rounded text-xs text-left">
                 <strong>Debug Info:</strong><br/>
                 URL: {window.location.href}<br/>
-                Data source attempted: {dataSource || 'None'}
+                Data source attempted: {dataSource || 'None'}<br/>
+                Robust param: {searchParams.get('d') ? 'Present' : 'Missing'}<br/>
+                Legacy param: {searchParams.get('data') ? 'Present' : 'Missing'}
               </div>
             </div>
             <Link to="/">
