@@ -11,8 +11,8 @@ export interface NewValuationData {
 }
 
 export function calculateAccurateValuation(data: NewValuationData) {
-  // Base multiple: 3.5x (Updated per request)
-  const baseMultiple = 3.5;
+  // Base multiple: 2x (Updated per request)
+  const baseMultiple = 2;
   
   // Convert ARR slider value to actual number
   let arr = data.arrSliderValue;
