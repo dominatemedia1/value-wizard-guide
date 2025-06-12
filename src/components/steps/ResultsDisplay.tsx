@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import {
   TrendingUp, DollarSign, Target, Zap, Award, ChevronRight, 
   BarChart3, Users, Clock, Shield, ArrowUp, ArrowDown,
   CheckCircle, AlertTriangle, Lightbulb, Trophy, 
-  Calculator, PieChart, TrendingDown, Share2, ExternalLink
+  Calculator, PieChart, TrendingDown, Share2, ExternalLink, Play
 } from 'lucide-react';
 import { ValuationData } from '../ValuationGuide';
 import { calculateAccurateValuation, NewValuationData } from '../../utils/newValuationCalculator';
@@ -40,13 +41,24 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
 
   const handleShare = async () => {
     try {
-      const shareableUrl = generateShareableUrl(valuationData);
-      await navigator.clipboard.writeText(shareableUrl);
+      const currentUrl = window.location.href;
+      console.log('📋 Current URL for sharing:', currentUrl);
+      await navigator.clipboard.writeText(currentUrl);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
-      console.log('📋 Copied shareable URL to clipboard');
+      console.log('📋 Copied current URL to clipboard');
     } catch (error) {
       console.error('❌ Failed to copy URL:', error);
+      // Fallback to generating shareable URL
+      try {
+        const shareableUrl = generateShareableUrl(valuationData);
+        await navigator.clipboard.writeText(shareableUrl);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+        console.log('📋 Copied fallback shareable URL to clipboard');
+      } catch (fallbackError) {
+        console.error('❌ Failed to copy fallback URL:', fallbackError);
+      }
     }
   };
 
@@ -343,6 +355,57 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
               </div>
             </CardContent>
           </Card>
+
+          {/* YouTube Marketing Enhancement Section */}
+          <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200 shadow-lg">
+            <CardContent className="p-10">
+              <h2 className="text-3xl font-bold text-foreground mb-8 flex items-center">
+                <Play className="w-8 h-8 text-red-600 mr-3" />
+                YouTube Marketing Opportunity
+              </h2>
+              
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-red-100">
+                <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                  <TrendingUp className="w-6 h-6 mr-3 text-red-600" />
+                  Scale Your Customer Acquisition with YouTube
+                </h3>
+                <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
+                  Based on your current CAC efficiency metrics, YouTube advertising could be the game-changer 
+                  for optimizing your marketing spend and dramatically improving your acquisition costs.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-red-50 rounded-xl p-6">
+                    <h4 className="font-semibold text-red-700 mb-3 text-lg">Why YouTube Works for SaaS:</h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• Lower CPCs than Google Ads</li>
+                      <li>• Higher engagement rates</li>
+                      <li>• Better brand building</li>
+                      <li>• Precise B2B targeting</li>
+                    </ul>
+                  </div>
+                  <div className="bg-orange-50 rounded-xl p-6">
+                    <h4 className="font-semibold text-orange-700 mb-3 text-lg">Potential Impact:</h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>• 30-50% reduction in CAC</li>
+                      <li>• 2-3x better conversion rates</li>
+                      <li>• Improved brand recognition</li>
+                      <li>• Scalable lead generation</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-red-100 to-orange-100 rounded-xl p-6">
+                  <h4 className="font-semibold text-red-700 mb-3 text-lg">Next Steps:</h4>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Consider investing in YouTube ads and content marketing to optimize your customer acquisition. 
+                    This could be the key factor in improving your CAC efficiency and unlocking that 
+                    <strong className="text-red-600"> {formatCurrency(valuation.leftOnTable)}</strong> opportunity value.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="metrics" className="space-y-8 mt-8">
@@ -529,31 +592,6 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Enhanced CTA Section */}
-      <Card className="bg-gradient-to-r from-primary via-primary to-primary/80 text-white shadow-xl">
-        <CardContent className="p-10 text-center">
-          <h2 className="text-3xl font-bold mb-6">Your Detailed Report Has Been Sent!</h2>
-          <p className="text-xl opacity-90 mb-8 leading-relaxed max-w-4xl mx-auto">
-            A comprehensive {actionPlan.length}-point action plan with your personalized roadmap has been delivered to {valuationData.email}.
-            This includes specific tactics, timelines, and ROI projections for unlocking your ${formatCurrency(valuation.leftOnTable)} opportunity.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-base opacity-90 max-w-2xl mx-auto">
-            <div className="flex flex-col items-center space-y-3">
-              <Shield className="w-8 h-8" />
-              <p>Confidential Analysis</p>
-            </div>
-            <div className="flex flex-col items-center space-y-3">
-              <Clock className="w-8 h-8" />
-              <p>Updated Quarterly</p>
-            </div>
-            <div className="flex flex-col items-center space-y-3">
-              <Users className="w-8 h-8" />
-              <p>Peer Benchmarking</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
