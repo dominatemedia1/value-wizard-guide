@@ -3,152 +3,86 @@ import { ValuationData } from '../components/ValuationGuide';
 
 export const generateShareableUrl = (valuationData: ValuationData, baseUrl: string = 'https://www.dominatemedia.io/unicorn-valuation/results'): string => {
   try {
-    console.log('🔄 Starting simplified URL generation...');
-    console.log('📝 Input valuation data:', valuationData);
+    console.log('🔄 Creating simple URL with parameters...');
     
-    // Create a minimal data object with only essential fields
-    const shareableData = {
-      arrSliderValue: valuationData.arrSliderValue,
-      nrr: valuationData.nrr,
-      revenueChurn: valuationData.revenueChurn,
-      qoqGrowthRate: valuationData.qoqGrowthRate,
-      cac: valuationData.cac,
-      cacContext: valuationData.cacContext,
-      profitability: valuationData.profitability,
-      marketGravity: valuationData.marketGravity,
-      businessModel: valuationData.businessModel,
-      firstName: valuationData.firstName,
-      lastName: valuationData.lastName,
-      email: valuationData.email,
-      phone: valuationData.phone || '',
-      companyName: valuationData.companyName,
-      website: valuationData.website || '',
-      timestamp: new Date().toISOString()
-    };
-
-    console.log('📦 Prepared shareable data:', shareableData);
-
-    // Convert to JSON string
-    const jsonString = JSON.stringify(shareableData);
-    console.log('📄 JSON string length:', jsonString.length);
-
-    // Simple base64 encoding
-    const base64Data = btoa(jsonString);
-    console.log('🔒 Base64 encoded length:', base64Data.length);
-
-    // Make URL-safe
-    const urlSafeData = base64Data
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
-    
-    console.log('🌐 URL-safe data length:', urlSafeData.length);
-    
-    // Create the URL with the encoded data
     const url = new URL(baseUrl);
-    url.searchParams.set('data', urlSafeData);
+    
+    // Add all valuation data as simple URL parameters
+    url.searchParams.set('arr', valuationData.arrSliderValue.toString());
+    url.searchParams.set('nrr', valuationData.nrr.toString());
+    url.searchParams.set('churn', valuationData.revenueChurn.toString());
+    url.searchParams.set('growth', valuationData.qoqGrowthRate.toString());
+    url.searchParams.set('cac', valuationData.cac.toString());
+    url.searchParams.set('cacContext', valuationData.cacContext);
+    url.searchParams.set('profit', valuationData.profitability);
+    url.searchParams.set('gravity', valuationData.marketGravity);
+    url.searchParams.set('model', valuationData.businessModel);
+    url.searchParams.set('firstName', valuationData.firstName);
+    url.searchParams.set('lastName', valuationData.lastName);
+    url.searchParams.set('email', valuationData.email);
+    url.searchParams.set('company', valuationData.companyName);
+    
+    if (valuationData.phone) {
+      url.searchParams.set('phone', valuationData.phone);
+    }
+    if (valuationData.website) {
+      url.searchParams.set('website', valuationData.website);
+    }
     
     const finalUrl = url.toString();
-    console.log('🔗 Final shareable URL:', finalUrl);
+    console.log('✅ Generated simple URL:', finalUrl);
     
     return finalUrl;
     
   } catch (error) {
-    console.error('❌ Error generating shareable URL:', error);
+    console.error('❌ Error generating URL:', error);
     return baseUrl;
   }
 };
 
 export const generateLocalResultsUrl = (valuationData: ValuationData): string => {
-  try {
-    console.log('🏠 Generating local results URL...');
-    
-    // Get current origin and create results URL with data
-    const baseUrl = `${window.location.origin}/results`;
-    
-    // Use the same encoding as generateShareableUrl
-    const shareableData = {
-      arrSliderValue: valuationData.arrSliderValue,
-      nrr: valuationData.nrr,
-      revenueChurn: valuationData.revenueChurn,
-      qoqGrowthRate: valuationData.qoqGrowthRate,
-      cac: valuationData.cac,
-      cacContext: valuationData.cacContext,
-      profitability: valuationData.profitability,
-      marketGravity: valuationData.marketGravity,
-      businessModel: valuationData.businessModel,
-      firstName: valuationData.firstName,
-      lastName: valuationData.lastName,
-      email: valuationData.email,
-      phone: valuationData.phone || '',
-      companyName: valuationData.companyName,
-      website: valuationData.website || '',
-      timestamp: new Date().toISOString()
-    };
-
-    const jsonString = JSON.stringify(shareableData);
-    const base64Data = btoa(jsonString);
-    const urlSafeData = base64Data
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
-    
-    const url = new URL(baseUrl);
-    url.searchParams.set('data', urlSafeData);
-    
-    const finalUrl = url.toString();
-    console.log('🏠 Generated local results URL:', finalUrl);
-    
-    return finalUrl;
-  } catch (error) {
-    console.error('❌ Error generating local results URL:', error);
-    return `${window.location.origin}/results`;
-  }
+  const baseUrl = `${window.location.origin}/results`;
+  return generateShareableUrl(valuationData, baseUrl);
 };
 
-export const decodeUrlData = (encodedData: string): ValuationData | null => {
+export const decodeUrlData = (searchParams: URLSearchParams): ValuationData | null => {
   try {
-    console.log('🔓 Starting decode process...');
-    console.log('📥 Raw encoded data received:', encodedData.substring(0, 50) + '...');
+    console.log('🔓 Decoding URL parameters...');
     
-    if (!encodedData || encodedData.trim() === '') {
-      console.error('❌ Empty or null encoded data');
-      return null;
-    }
-
-    // Restore URL-safe characters to standard base64
-    let base64Data = encodedData
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
+    const arr = searchParams.get('arr');
+    const nrr = searchParams.get('nrr');
+    const firstName = searchParams.get('firstName');
+    const email = searchParams.get('email');
+    const company = searchParams.get('company');
     
-    // Add padding if needed
-    const paddingNeeded = 4 - (base64Data.length % 4);
-    if (paddingNeeded !== 4) {
-      base64Data += '='.repeat(paddingNeeded);
-    }
-    
-    console.log('🔄 Attempting base64 decode...');
-    
-    // Decode base64 to string
-    const decodedString = atob(base64Data);
-    console.log('📄 Decoded string length:', decodedString.length);
-    
-    // Parse JSON
-    const parsedData = JSON.parse(decodedString);
-    console.log('✅ Successfully parsed data:', parsedData);
-    
-    // Validate that we have the essential fields
-    if (!parsedData.firstName || !parsedData.email || !parsedData.companyName) {
-      console.error('❌ Missing essential fields in decoded data');
-      console.log('📋 Available fields:', Object.keys(parsedData));
+    if (!arr || !nrr || !firstName || !email || !company) {
+      console.error('❌ Missing required URL parameters');
       return null;
     }
     
-    console.log('✅ Data validation passed');
-    return parsedData as ValuationData;
+    const valuationData: ValuationData = {
+      arrSliderValue: parseInt(arr),
+      nrr: parseInt(nrr),
+      revenueChurn: parseInt(searchParams.get('churn') || '0'),
+      qoqGrowthRate: parseInt(searchParams.get('growth') || '0'),
+      cac: parseInt(searchParams.get('cac') || '0'),
+      cacContext: searchParams.get('cacContext') || '',
+      profitability: searchParams.get('profit') || '',
+      marketGravity: searchParams.get('gravity') || '',
+      businessModel: searchParams.get('model') || '',
+      firstName: firstName,
+      lastName: searchParams.get('lastName') || '',
+      email: email,
+      phone: searchParams.get('phone') || '',
+      companyName: company,
+      website: searchParams.get('website') || ''
+    };
+    
+    console.log('✅ Successfully decoded data:', valuationData);
+    return valuationData;
+    
   } catch (error) {
     console.error('❌ Error decoding URL data:', error);
-    console.log('🔍 Error details:', error);
     return null;
   }
 };

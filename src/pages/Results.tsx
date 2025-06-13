@@ -16,26 +16,17 @@ const Results = () => {
   const [dataSource, setDataSource] = useState<string>('');
 
   useEffect(() => {
-    console.log('🚀 Results page loading with simplified URL handling...');
+    console.log('🚀 Results page loading...');
     console.log('🔍 Current URL:', window.location.href);
-    console.log('🔍 Search params:', Object.fromEntries(searchParams.entries()));
     
-    // Try to get data from URL parameter 'data'
-    const encodedData = searchParams.get('data');
-    if (encodedData) {
-      console.log('🔄 Attempting URL decode...');
-      try {
-        const decodedData = decodeUrlData(encodedData);
-        if (decodedData) {
-          console.log('✅ Successfully loaded data from URL');
-          setValuationData(decodedData);
-          setDataSource('URL parameter');
-          setLoading(false);
-          return;
-        }
-      } catch (error) {
-        console.error('❌ URL decode failed:', error);
-      }
+    // Try to get data from URL parameters first
+    const urlData = decodeUrlData(searchParams);
+    if (urlData) {
+      console.log('✅ Successfully loaded data from URL parameters');
+      setValuationData(urlData);
+      setDataSource('URL parameters');
+      setLoading(false);
+      return;
     }
 
     // Fallback to localStorage
@@ -54,7 +45,6 @@ const Results = () => {
       console.error('❌ Error loading stored data:', error);
     }
     
-    console.log('🏁 Data loading process complete');
     setLoading(false);
   }, [searchParams]);
 
@@ -80,20 +70,8 @@ const Results = () => {
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">No Results Found</h1>
               <p className="text-muted-foreground">
-                We couldn't find your valuation data. This could happen if:
+                We couldn't find your valuation data. Please start a new valuation.
               </p>
-              <ul className="text-sm text-muted-foreground text-left space-y-1 mt-4">
-                <li>• The link has expired or is invalid</li>
-                <li>• You haven't completed the valuation yet</li>
-                <li>• Your browser data has been cleared</li>
-                <li>• The URL parameters are corrupted</li>
-              </ul>
-              <div className="mt-4 p-3 bg-muted rounded text-xs text-left">
-                <strong>Debug Info:</strong><br/>
-                URL: {window.location.href}<br/>
-                Data source attempted: {dataSource || 'None'}<br/>
-                URL param: {searchParams.get('data') ? 'Present' : 'Missing'}
-              </div>
             </div>
             <Link to="/">
               <Button className="w-full">
@@ -110,13 +88,6 @@ const Results = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-4 pt-[45px] pb-8 max-w-6xl">
-        {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-sm">
-            <strong>Debug:</strong> Data loaded from {dataSource}
-          </div>
-        )}
-        
         {/* Header with back button */}
         <div className="mb-8">
           <Link to="/">
@@ -127,7 +98,7 @@ const Results = () => {
           </Link>
         </div>
 
-        {/* Results with better spacing */}
+        {/* Results */}
         <div className="space-y-8">
           <ResultsDisplay 
             valuationData={valuationData}
