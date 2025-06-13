@@ -13,18 +13,18 @@ const Results = () => {
   const [searchParams] = useSearchParams();
   const [valuationData, setValuationData] = useState<ValuationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dataSource, setDataSource] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     console.log('🚀 Results page loading...');
     console.log('🔍 Current URL:', window.location.href);
+    console.log('📋 Search params:', Object.fromEntries(searchParams.entries()));
     
     // Try to get data from URL parameters first
     const urlData = decodeUrlData(searchParams);
     if (urlData) {
       console.log('✅ Successfully loaded data from URL parameters');
       setValuationData(urlData);
-      setDataSource('URL parameters');
       setLoading(false);
       return;
     }
@@ -38,11 +38,17 @@ const Results = () => {
         if (parsedData.valuationData) {
           console.log('✅ Successfully loaded data from localStorage');
           setValuationData(parsedData.valuationData);
-          setDataSource('localStorage');
+        } else {
+          console.log('❌ No valuationData found in stored object');
+          setError('No valuation data found');
         }
+      } else {
+        console.log('❌ No data found in localStorage');
+        setError('No valuation data found');
       }
     } catch (error) {
       console.error('❌ Error loading stored data:', error);
+      setError('Error loading valuation data');
     }
     
     setLoading(false);
@@ -59,7 +65,7 @@ const Results = () => {
     );
   }
 
-  if (!valuationData) {
+  if (!valuationData || error) {
     return (
       <div className="min-h-screen flex items-start justify-center pt-[45px] p-4">
         <Card className="max-w-md w-full">
@@ -70,7 +76,7 @@ const Results = () => {
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">No Results Found</h1>
               <p className="text-muted-foreground">
-                We couldn't find your valuation data. Please start a new valuation.
+                {error || 'We couldn\'t find your valuation data. Please start a new valuation.'}
               </p>
             </div>
             <Link to="/">

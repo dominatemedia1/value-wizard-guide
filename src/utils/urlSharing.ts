@@ -3,14 +3,14 @@ import { ValuationData } from '../components/ValuationGuide';
 
 export const generateShareableUrl = (valuationData: ValuationData, baseUrl: string = 'https://www.dominatemedia.io/unicorn-valuation/results'): string => {
   try {
-    console.log('🔄 Creating simple URL with parameters...');
+    console.log('🔄 Creating shareable URL...');
     
     const url = new URL(baseUrl);
     
-    // Add all valuation data as simple URL parameters
+    // Add all valuation data as URL parameters
     url.searchParams.set('arr', valuationData.arrSliderValue.toString());
-    url.searchParams.set('nrr', valuationData.nrr.toString());
-    url.searchParams.set('churn', valuationData.revenueChurn.toString());
+    url.searchParams.set('nrr', valuationData.nrr);
+    url.searchParams.set('churn', valuationData.revenueChurn);
     url.searchParams.set('growth', valuationData.qoqGrowthRate.toString());
     url.searchParams.set('cac', valuationData.cac.toString());
     url.searchParams.set('cacContext', valuationData.cacContext);
@@ -30,7 +30,7 @@ export const generateShareableUrl = (valuationData: ValuationData, baseUrl: stri
     }
     
     const finalUrl = url.toString();
-    console.log('✅ Generated simple URL:', finalUrl);
+    console.log('✅ Generated URL:', finalUrl);
     
     return finalUrl;
     
@@ -55,17 +55,34 @@ export const decodeUrlData = (searchParams: URLSearchParams): ValuationData | nu
     const email = searchParams.get('email');
     const company = searchParams.get('company');
     
+    // Check for required parameters
     if (!arr || !nrr || !firstName || !email || !company) {
-      console.error('❌ Missing required URL parameters');
+      console.error('❌ Missing required URL parameters:', {
+        arr: !!arr,
+        nrr: !!nrr,
+        firstName: !!firstName,
+        email: !!email,
+        company: !!company
+      });
+      return null;
+    }
+    
+    // Parse and validate numeric values
+    const arrValue = parseInt(arr);
+    const growthValue = parseInt(searchParams.get('growth') || '0');
+    const cacValue = parseInt(searchParams.get('cac') || '0');
+    
+    if (isNaN(arrValue) || isNaN(growthValue) || isNaN(cacValue)) {
+      console.error('❌ Invalid numeric values in URL parameters');
       return null;
     }
     
     const valuationData: ValuationData = {
-      arrSliderValue: parseInt(arr),
-      nrr: nrr, // Keep as string since ValuationData expects string
-      revenueChurn: searchParams.get('churn') || '0', // Keep as string
-      qoqGrowthRate: parseInt(searchParams.get('growth') || '0'),
-      cac: parseInt(searchParams.get('cac') || '0'),
+      arrSliderValue: arrValue,
+      nrr: nrr,
+      revenueChurn: searchParams.get('churn') || '0',
+      qoqGrowthRate: growthValue,
+      cac: cacValue,
       cacContext: searchParams.get('cacContext') || '',
       profitability: searchParams.get('profit') || '',
       marketGravity: searchParams.get('gravity') || '',
