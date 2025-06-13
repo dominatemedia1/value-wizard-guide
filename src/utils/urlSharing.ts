@@ -62,8 +62,8 @@ export const decodeUrlData = (searchParams: URLSearchParams): ValuationData | nu
     
     const valuationData: ValuationData = {
       arrSliderValue: parseInt(arr),
-      nrr: parseInt(nrr),
-      revenueChurn: parseInt(searchParams.get('churn') || '0'),
+      nrr: nrr, // Keep as string since ValuationData expects string
+      revenueChurn: searchParams.get('churn') || '0', // Keep as string
       qoqGrowthRate: parseInt(searchParams.get('growth') || '0'),
       cac: parseInt(searchParams.get('cac') || '0'),
       cacContext: searchParams.get('cacContext') || '',
