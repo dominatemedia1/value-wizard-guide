@@ -79,8 +79,8 @@ export const decodeUrlData = (searchParams: URLSearchParams): ValuationData | nu
     
     const valuationData: ValuationData = {
       arrSliderValue: arrValue,
-      nrr: nrr, // Keep as string since it's defined as string in ValuationData
-      revenueChurn: searchParams.get('churn') || '0', // Keep as string since it's defined as string in ValuationData
+      nrr: nrr,
+      revenueChurn: searchParams.get('churn') || '0',
       qoqGrowthRate: growthValue,
       cac: cacValue,
       cacContext: searchParams.get('cacContext') || '',
