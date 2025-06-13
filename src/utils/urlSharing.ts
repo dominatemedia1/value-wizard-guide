@@ -1,7 +1,7 @@
 
 import { ValuationData } from '../components/ValuationGuide';
 
-export const generateShareableUrl = (valuationData: ValuationData, baseUrl: string = 'https://dominatemedia.io'): string => {
+export const generateShareableUrl = (valuationData: ValuationData, baseUrl: string = 'https://www.dominatemedia.io/unicorn-valuation/results'): string => {
   try {
     console.log('🔄 Starting simplified URL generation...');
     console.log('📝 Input valuation data:', valuationData);

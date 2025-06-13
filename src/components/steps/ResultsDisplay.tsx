@@ -7,12 +7,10 @@ import {
   TrendingUp, DollarSign, Target, Zap, Award, ChevronRight, 
   BarChart3, Users, Clock, Shield, ArrowUp, ArrowDown,
   CheckCircle, AlertTriangle, Lightbulb, Trophy, 
-  PieChart, TrendingDown, Share2, ExternalLink, Play, Copy
+  PieChart, TrendingDown, Share2, ExternalLink, Play
 } from 'lucide-react';
 import { ValuationData } from '../ValuationGuide';
 import { calculateAccurateValuation, NewValuationData } from '../../utils/newValuationCalculator';
-import { generateLocalResultsUrl, generateShareableUrl } from '../../utils/urlSharing';
-import ShareModal from '../ShareModal';
 
 interface ResultsDisplayProps {
   valuationData: ValuationData;
@@ -21,7 +19,6 @@ interface ResultsDisplayProps {
 
 const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [showShareModal, setShowShareModal] = useState(false);
 
   // Prepare data for new calculation
   const newValuationData: NewValuationData = {
@@ -38,23 +35,6 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
 
   // Calculate valuation using the new calculator
   const valuation = calculateAccurateValuation(newValuationData);
-
-  // Generate URLs using the simplified system
-  const currentShareUrl = generateLocalResultsUrl(valuationData);
-  const externalShareUrl = 'https://dominatemedia.io';
-
-  console.log('📋 Current share URL:', currentShareUrl);
-  console.log('🌐 External share URL:', externalShareUrl);
-
-  const handleShare = () => {
-    console.log('📋 Opening share modal...');
-    setShowShareModal(true);
-  };
-
-  const handleViewExternal = () => {
-    console.log('🌐 Opening external URL...');
-    window.open(externalShareUrl, '_blank');
-  };
 
   // Helper functions for display
   const formatCurrency = (amount: number) => {
@@ -120,20 +100,8 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
 
   return (
     <div className="space-y-12 w-full max-w-none">
-      {/* Main Results Section - Removed icon, title, and subtitle */}
+      {/* Main Results Section */}
       <div className="text-center space-y-8">
-        {/* Share buttons */}
-        <div className="flex justify-center gap-4 lg:gap-6">
-          <Button onClick={handleShare} variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4">
-            <Share2 className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
-            Share Results
-          </Button>
-          <Button onClick={handleViewExternal} variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4">
-            <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
-            View on Dominate Media
-          </Button>
-        </div>
-        
         {/* Enhanced value cards with full desktop width */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 xl:gap-12 w-full max-w-7xl mx-auto">
           <Card className="border-2 border-primary/20 relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -468,14 +436,6 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
           </div>
         </CardContent>
       </Card>
-
-      {/* Share Modal */}
-      <ShareModal 
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        shareUrl={currentShareUrl}
-        externalUrl={externalShareUrl}
-      />
     </div>
   );
 };
