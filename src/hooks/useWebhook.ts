@@ -11,7 +11,6 @@ export const useWebhook = () => {
       
       const newValuationData: NewValuationData = {
         arrSliderValue: data.arrSliderValue,
-        nrr: data.nrr,
         revenueChurn: data.revenueChurn,
         qoqGrowthRate: data.qoqGrowthRate,
         cac: data.cac,
@@ -44,7 +43,7 @@ export const useWebhook = () => {
         companyName: data.companyName,
         website: data.website,
         arrSliderValue: data.arrSliderValue,
-        nrr: data.nrr,
+        nrr: '', // Empty since we removed NRR
         revenueChurn: data.revenueChurn,
         qoqGrowthRate: data.qoqGrowthRate,
         cac: data.cac,

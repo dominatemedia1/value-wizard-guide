@@ -2,7 +2,6 @@
 import React from 'react';
 import { ValuationData } from './ValuationGuide';
 import ARRStep from './steps/ARRStep';
-import NRRStep from './steps/NRRStep';
 import ChurnStep from './steps/ChurnStep';
 import QoQGrowthStep from './steps/QoQGrowthStep';
 import NewCACStep from './steps/NewCACStep';
@@ -56,22 +55,13 @@ const StepRenderer = ({
       );
     case 1:
       return (
-        <NRRStep
-          value={valuationData.nrr}
-          onChange={(value) => updateValuationData('nrr', value)}
-          onNext={nextStep}
-          firstName={valuationData.firstName}
-        />
-      );
-    case 2:
-      return (
         <ChurnStep
           value={valuationData.revenueChurn}
           onChange={(value) => updateValuationData('revenueChurn', value)}
           onNext={nextStep}
         />
       );
-    case 3:
+    case 2:
       return (
         <QoQGrowthStep
           value={valuationData.qoqGrowthRate}
@@ -79,7 +69,7 @@ const StepRenderer = ({
           onNext={nextStep}
         />
       );
-    case 4:
+    case 3:
       return (
         <NewCACStep
           cac={valuationData.cac}
@@ -89,7 +79,7 @@ const StepRenderer = ({
           onNext={nextStep}
         />
       );
-    case 5:
+    case 4:
       return (
         <ProfitabilityStep
           value={valuationData.profitability}
@@ -97,7 +87,7 @@ const StepRenderer = ({
           onNext={nextStep}
         />
       );
-    case 6:
+    case 5:
       return (
         <MarketGravityStep
           value={valuationData.marketGravity}
@@ -106,7 +96,7 @@ const StepRenderer = ({
           firstName={valuationData.firstName}
         />
       );
-    case 7:
+    case 6:
       return (
         <NewBusinessModelStep
           value={valuationData.businessModel}
@@ -114,7 +104,7 @@ const StepRenderer = ({
           onNext={nextStep}
         />
       );
-    case 8:
+    case 7:
       return (
         <FinalContactStep
           firstName={valuationData.firstName}

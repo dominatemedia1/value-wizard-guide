@@ -18,7 +18,7 @@ const QoQGrowthStep = ({ value, onChange, onNext }: QoQGrowthStepProps) => {
     <div className="space-y-8">
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-foreground">
-          What's your quarter-over-quarter growth rate?
+          What's your year-over-year growth rate?
         </h2>
         <p className="text-muted-foreground">
           This directly impacts your valuation multiple, so be as accurate as possible.
@@ -36,7 +36,7 @@ const QoQGrowthStep = ({ value, onChange, onNext }: QoQGrowthStepProps) => {
             <Slider
               value={[value]}
               onValueChange={handleSliderChange}
-              max={100}
+              max={200}
               min={-50}
               step={1}
               className="w-full"
@@ -44,7 +44,7 @@ const QoQGrowthStep = ({ value, onChange, onNext }: QoQGrowthStepProps) => {
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
               <span>-50%</span>
               <span>0%</span>
-              <span>+100%</span>
+              <span>+200%</span>
             </div>
           </div>
         </div>

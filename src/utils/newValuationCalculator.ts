@@ -1,6 +1,5 @@
 export interface NewValuationData {
   arrSliderValue: number;
-  nrr: string;
   revenueChurn: string;
   qoqGrowthRate: number;
   cac: number;
@@ -17,34 +16,9 @@ export function calculateAccurateValuation(data: NewValuationData) {
   // Convert ARR slider value to actual number
   let arr = data.arrSliderValue;
   
-  // 1. NRR MULTIPLIER (Research: Most important factor)
-  let nrrMultiplier;
-  switch(data.nrr) {
-    case 'below_90': 
-      nrrMultiplier = 0.6; 
-      break;
-    case '90_100': 
-      nrrMultiplier = 0.8; 
-      break;
-    case '100_110': 
-      nrrMultiplier = 1.0; 
-      break;
-    case '110_120': 
-      nrrMultiplier = 1.3; 
-      break;
-    case '120_plus': 
-      nrrMultiplier = 1.6; 
-      break;
-    case 'dont_track': 
-      nrrMultiplier = 0.9; // Penalty for not tracking
-      break;
-    default: 
-      nrrMultiplier = 0.9;
-  }
-  
-  // 2. GROWTH MULTIPLIER (Research: Primary valuation driver)
-  let qoqGrowth = data.qoqGrowthRate / 100;
-  let annualGrowthRate = Math.pow(1 + qoqGrowth, 4) - 1;
+  // 1. GROWTH MULTIPLIER (Research: Primary valuation driver)
+  // Now treating qoqGrowthRate as annual growth rate since we changed to year-over-year
+  let annualGrowthRate = data.qoqGrowthRate / 100;
   
   let growthMultiplier;
   if (annualGrowthRate < -0.1) {
@@ -63,7 +37,7 @@ export function calculateAccurateValuation(data: NewValuationData) {
     growthMultiplier = 2.0; // 100%+ growth
   }
   
-  // 3. CHURN MULTIPLIER (Research: Key metric investors watch)
+  // 2. CHURN MULTIPLIER (Research: Key metric investors watch)
   let churnMultiplier;
   switch(data.revenueChurn) {
     case 'under_2': 
@@ -88,7 +62,7 @@ export function calculateAccurateValuation(data: NewValuationData) {
       churnMultiplier = 0.9;
   }
   
-  // 4. PROFITABILITY MULTIPLIER (Research: 2025 market rewards profitable)
+  // 3. PROFITABILITY MULTIPLIER (Research: 2025 market rewards profitable)
   let profitabilityMultiplier;
   switch(data.profitability) {
     case 'profitable_20_plus': 
@@ -110,7 +84,7 @@ export function calculateAccurateValuation(data: NewValuationData) {
       profitabilityMultiplier = 0.9;
   }
   
-  // 5. MARKET GRAVITY MULTIPLIER (Network Effects + Brand Authority)
+  // 4. MARKET GRAVITY MULTIPLIER (Network Effects + Brand Authority)
   let marketGravityMultiplier;
   switch(data.marketGravity) {
     case 'massive_magnet': 
@@ -132,7 +106,7 @@ export function calculateAccurateValuation(data: NewValuationData) {
       marketGravityMultiplier = 0.9;
   }
   
-  // 6. CAC EFFICIENCY (Simplified calculation)
+  // 5. CAC EFFICIENCY (Simplified calculation)
   let cacEfficiency = 1.0; // Default
   if (data.cac && data.cacContext !== 'no_clue') {
     let monthlyCAC = data.cac / 12;
@@ -152,12 +126,11 @@ export function calculateAccurateValuation(data: NewValuationData) {
     }
   }
   
-  // 7. B2B/B2C MULTIPLIER (Research confirmed)
+  // 6. B2B/B2C MULTIPLIER (Research confirmed)
   let businessModelMultiplier = data.isB2B ? 1.1 : 0.9;
   
-  // CALCULATE CURRENT VALUATION
+  // CALCULATE CURRENT VALUATION (without NRR multiplier)
   let currentValuation = arr * baseMultiple * 
-    nrrMultiplier * 
     growthMultiplier * 
     churnMultiplier * 
     profitabilityMultiplier * 
@@ -165,9 +138,8 @@ export function calculateAccurateValuation(data: NewValuationData) {
     cacEfficiency * 
     businessModelMultiplier;
   
-  // CALCULATE OPTIMIZED VALUATION (Best-in-class metrics)
+  // CALCULATE OPTIMIZED VALUATION (Best-in-class metrics, without NRR)
   let optimizedValuation = arr * baseMultiple * 
-    1.6 * // Excellent NRR (120%+)
     1.6 * // High growth (60%+ annual)
     1.3 * // Low churn (<2% monthly)
     1.4 * // Strong profitability (20%+ margins)
@@ -175,15 +147,8 @@ export function calculateAccurateValuation(data: NewValuationData) {
     1.3 * // Excellent CAC efficiency
     businessModelMultiplier;
   
-  // IDENTIFY BIGGEST OPPORTUNITY
+  // IDENTIFY BIGGEST OPPORTUNITY (updated without NRR)
   let opportunities = [
-    {
-      factor: 'Net Revenue Retention', 
-      current: nrrMultiplier, 
-      potential: 1.6, 
-      impact: arr * baseMultiple * (1.6 - nrrMultiplier),
-      description: 'Expand existing customers, reduce churn'
-    },
     {
       factor: 'Growth Rate', 
       current: growthMultiplier, 
@@ -229,11 +194,11 @@ export function calculateAccurateValuation(data: NewValuationData) {
   // Calculate competitive benchmark
   let medianValuation = arr * baseMultiple * 1.0;
   
-  // Calculate scores for email variables (1-5 scale)
-  const nrrScore = Math.round(nrrMultiplier * 3.125); // Convert 0.6-1.6 to 1-5
+  // Calculate scores for email variables (1-5 scale, updated without NRR)
   const cacScore = Math.round(cacEfficiency * 3.125); // Convert 0.7-1.3 to 1-5  
   const brandScore = Math.round(marketGravityMultiplier * 3.125); // Convert 0.8-1.3 to 1-5
   const growthScore = Math.round(growthMultiplier * 2.5); // Convert 0.4-2.0 to 1-5
+  const churnScore = Math.round(churnMultiplier * 3.125); // Convert 0.6-1.3 to 1-5
   
   return {
     current: Math.round(currentValuation),
@@ -244,11 +209,11 @@ export function calculateAccurateValuation(data: NewValuationData) {
     biggestOpportunity: Math.round(biggestOpportunity.impact),
     improvementDescription: biggestOpportunity.description,
     
-    // Email template variables
+    // Email template variables (updated without revenue_score/NRR)
     emailVariables: {
       current_valuation: formatCurrency(Math.round(currentValuation)),
       gap_amount: formatCurrency(Math.round(optimizedValuation - currentValuation)),
-      revenue_score: Math.max(1, Math.min(5, nrrScore)),
+      revenue_score: Math.max(1, Math.min(5, churnScore)), // Using churn score instead of NRR
       cac_score: Math.max(1, Math.min(5, cacScore)),
       brand_score: Math.max(1, Math.min(5, brandScore)), 
       growth_score: Math.max(1, Math.min(5, growthScore)),
@@ -257,10 +222,9 @@ export function calculateAccurateValuation(data: NewValuationData) {
       roi_calculation: Math.round(((optimizedValuation - currentValuation) / currentValuation) * 100 * 100) // ROI as percentage * 100
     },
     
-    // Detailed breakdown for results page
+    // Detailed breakdown for results page (updated without NRR)
     multiplierBreakdown: {
       base: baseMultiple,
-      nrr: nrrMultiplier,
       growth: growthMultiplier,
       churn: churnMultiplier,
       profitability: profitabilityMultiplier,
@@ -290,7 +254,6 @@ function formatCurrency(amount: number): string {
 
 function mapBiggestLeak(factor: string): string {
   const mapping: { [key: string]: string } = {
-    'Net Revenue Retention': 'Brand Authority',
     'Growth Rate': 'Lead Generation', 
     'Revenue Retention': 'Brand Authority',
     'Profitability': 'Market Positioning',

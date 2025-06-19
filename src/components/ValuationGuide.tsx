@@ -43,7 +43,7 @@ const ValuationGuide = () => {
     updateValuationData
   } = useValuationData();
 
-  const totalSteps = 9;
+  const totalSteps = 8; // Updated from 9 to 8 since we removed NRR step
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   useEffect(() => {
@@ -98,7 +98,7 @@ const ValuationGuide = () => {
   }, [currentStep, showResultsWaiting, showResults, isSubmitted]);
 
   const nextStep = async () => {
-    if (currentStep === 8) {
+    if (currentStep === 7) { // Updated from 8 to 7
       console.log('🚀 Form validation starting...');
       console.log('📝 Current valuation data:', valuationData);
       
