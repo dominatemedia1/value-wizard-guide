@@ -20,10 +20,9 @@ interface ResultsDisplayProps {
 const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Prepare data for new calculation
+  // Prepare data for new calculation - removed nrr reference
   const newValuationData: NewValuationData = {
     arrSliderValue: valuationData.arrSliderValue,
-    nrr: valuationData.nrr,
     revenueChurn: valuationData.revenueChurn,
     qoqGrowthRate: valuationData.qoqGrowthRate,
     cac: valuationData.cac,
@@ -61,13 +60,13 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
 
   const metrics = [
     {
-      label: 'Net Revenue Retention',
+      label: 'Revenue Retention',
       score: valuation.emailVariables.revenue_score,
       icon: DollarSign,
       description: 'Measures customer expansion and retention effectiveness',
-      multiplier: valuation.multiplierBreakdown.nrr,
-      benchmark: 'Industry avg: 105-115%',
-      recommendation: valuation.multiplierBreakdown.nrr < 1.0 ? 'Focus on upselling and reducing churn' : 'Maintain excellent retention practices'
+      multiplier: valuation.multiplierBreakdown.churn,
+      benchmark: 'Industry avg: <5% monthly churn',
+      recommendation: valuation.multiplierBreakdown.churn < 1.0 ? 'Focus on reducing churn and improving retention' : 'Maintain excellent retention practices'
     },
     {
       label: 'CAC Efficiency',
@@ -91,7 +90,7 @@ const ResultsDisplay = ({ valuationData, onSendEmail }: ResultsDisplayProps) => 
       label: 'Growth Trajectory',
       score: valuation.emailVariables.growth_score,
       icon: TrendingUp,
-      description: 'Quarter-over-quarter growth momentum and sustainability',
+      description: 'Year-over-year growth momentum and sustainability',
       multiplier: valuation.multiplierBreakdown.growth,
       benchmark: 'High-growth: 40%+ annually',
       recommendation: valuation.multiplierBreakdown.growth < 1.0 ? 'Accelerate product-market fit and scaling' : 'Maintain growth efficiency'

@@ -1,4 +1,3 @@
-
 import { ValuationData } from '../components/ValuationGuide';
 
 export interface SavedData {
@@ -54,7 +53,23 @@ const decompressData = (compressed: any): SavedData => {
     }
 
     const decompressed: SavedData = {
-      valuationData: compressed.vd || {},
+      valuationData: compressed.vd ||  {
+        arrSliderValue: 0,
+        nrr: '',
+        revenueChurn: '',
+        qoqGrowthRate: 0,
+        cac: 0,
+        cacContext: 'per_customer',
+        profitability: '',
+        marketGravity: '',
+        businessModel: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        companyName: '',
+        website: ''
+      },
       currentStep: Math.max(0, compressed.cs || 0),
       isSubmitted: Boolean(compressed.is),
       showResultsWaiting: Boolean(compressed.srw),
@@ -68,6 +83,7 @@ const decompressData = (compressed: any): SavedData => {
       decompressed.currentStep = 0;
     }
 
+    console.log('✅ Successfully decompressed data:', decompressed);
     return decompressed;
   } catch (error) {
     console.error('❌ Error decompressing data:', error);
@@ -101,12 +117,18 @@ const saveToLocalStorage = (data: SavedData): boolean => {
   }
 };
 
-const loadFromLocalStorage = (): SavedData | undefined => {
+const loadFromLocalStorage = (): SavedData | undefined => {  
   try {
     const data = localStorage.getItem(COOKIE_NAME);
-    if (!data) return undefined;
+    console.log('🔍 Raw localStorage data:', data);
+    
+    if (!data) {
+      console.log('📭 No localStorage data found');
+      return undefined;
+    }
     
     const parsed = JSON.parse(data);
+    console.log('📦 Parsed localStorage data:', parsed);
     
     // Validate data before returning
     if (!parsed || typeof parsed !== 'object') {
@@ -128,6 +150,7 @@ const loadFromLocalStorage = (): SavedData | undefined => {
 // Enhanced cookie operations with better error handling
 export const saveValuationData = (data: SavedData): boolean => {
   console.log('💾 Starting save operation for valuation data');
+  console.log('📊 Data to save:', data);
   
   try {
     // Add timestamp and version info
@@ -142,6 +165,7 @@ export const saveValuationData = (data: SavedData): boolean => {
     const jsonString = JSON.stringify(compressedData);
     
     console.log(`📊 Compressed data size: ${jsonString.length} bytes`);
+    console.log('🔧 Compressed data:', compressedData);
     
     // Try cookies first if data is small enough
     if (jsonString.length <= MAX_COOKIE_SIZE) {
@@ -150,11 +174,17 @@ export const saveValuationData = (data: SavedData): boolean => {
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + EXPIRY_DAYS);
         
-        const cookieString = `${COOKIE_NAME}=${encodedValue}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax; Secure`;
+        const cookieString = `${COOKIE_NAME}=${encodedValue}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
         document.cookie = cookieString;
         
+        console.log('🍪 Attempting to set cookie:', cookieString.substring(0, 100) + '...');
+        
         // Verify cookie was set
-        if (document.cookie.includes(`${COOKIE_NAME}=`)) {
+        const cookieCheck = document.cookie.includes(`${COOKIE_NAME}=`);
+        console.log('🔍 Cookie verification result:', cookieCheck);
+        console.log('🍪 Current cookies:', document.cookie);
+        
+        if (cookieCheck) {
           console.log('✅ Data saved to cookies successfully');
           // Also save to localStorage as backup
           saveToLocalStorage(dataWithMeta);
@@ -178,39 +208,55 @@ export const saveValuationData = (data: SavedData): boolean => {
 
 export const loadValuationData = (): SavedData | undefined => {
   console.log('📖 Starting load operation for valuation data');
+  console.log('🍪 Current cookies:', document.cookie);
   
   try {
     // Try cookies first
     const cookies = document.cookie.split(';');
+    console.log('🔍 All cookies:', cookies);
+    
     const valuationCookie = cookies.find(cookie => 
       cookie.trim().startsWith(`${COOKIE_NAME}=`)
     );
     
+    console.log('🎯 Found valuation cookie:', valuationCookie);
+    
     if (valuationCookie) {
       try {
         const cookieValue = valuationCookie.split('=').slice(1).join('=').trim();
+        console.log('🔓 Cookie value (first 100 chars):', cookieValue.substring(0, 100));
+        
         const decodedValue = decodeURIComponent(cookieValue);
+        console.log('🔓 Decoded value (first 100 chars):', decodedValue.substring(0, 100));
+        
         const parsedData = JSON.parse(decodedValue);
+        console.log('🔧 Parsed cookie data:', parsedData);
         
         let result: SavedData;
         if (parsedData.vd || parsedData.v) {
           // Compressed format
+          console.log('🗃️ Using compressed format');
           result = decompressData(parsedData);
         } else {
           // Legacy format
+          console.log('📜 Using legacy format');
           result = parsedData;
         }
         
-        console.log('✅ Successfully loaded data from cookies');
+        console.log('✅ Successfully loaded data from cookies:', result);
         return result;
       } catch (cookieError) {
         console.warn('⚠️ Cookie parsing failed, trying localStorage:', cookieError);
       }
+    } else {
+      console.log('🍪 No valuation cookie found');
     }
     
     // Fallback to localStorage
+    console.log('🔄 Falling back to localStorage');
     const localData = loadFromLocalStorage();
     if (localData) {
+      console.log('✅ Successfully loaded data from localStorage');
       return localData;
     }
     
